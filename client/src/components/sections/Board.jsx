@@ -1,15 +1,14 @@
 import LetterRow from '../common/LetterRow.jsx'
+import { MAX_ATTEMPTS } from '../../../gameConfig.js'
 
 function Board() {
-  const rows = []
-
-  for ( let i = 0; i < 6; i++ ) {
-    rows.push(
-      <LetterRow letters={ '' }/>,
-    )
-  }
-
-  return <div className="grid gap-2">{ rows }</div>
+  return (
+    <div className="grid gap-2">
+      { Array.from({ length: MAX_ATTEMPTS }).map((_, i) => (
+        <LetterRow key={ i } isFirstRow={ i === 0 }/>
+      )) }
+    </div>
+  )
 }
 
 export default Board
