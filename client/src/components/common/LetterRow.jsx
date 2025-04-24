@@ -1,28 +1,21 @@
-import { useState } from 'react'
 import LetterBox from './LetterBox.jsx'
-import { WORD_LENGTH } from '../../../gameConfig.js'
+import { useKeyboard } from '../../context/keyboardContext.jsx'
 
-function LetterRow({ isFirstRow }) {
-  const [ letters, setLetters ] = useState(
-    Array.from({ length: WORD_LENGTH }).map(() => ( { char: '', status: 'empty' } )),
-  )
+function LetterRow({ rowIndex, isFirstRow }) {
+  const { letters, handleChange, currentRow } = useKeyboard()
 
-  const handleChange = (index, value) => {
-    const updated = [ ...letters ]
-    updated[index].char = value
-    setLetters(updated)
-  }
+  const isCurrentRow = rowIndex === currentRow
 
   return (
-    <div className="flex gap-1.5">
-      { letters.map((letter, index) => (
+    <div className="flex gap-[5px]">
+      { letters[rowIndex].map((letter, index) => (
         <LetterBox
           key={ index }
           letter={ letter.char }
           status={ letter.status }
           index={ index }
           isFirstBox={ isFirstRow && index === 0 }
-          onChange={ handleChange }
+          onChange={ isCurrentRow ? (value) => handleChange(rowIndex, index, value) : null }
         />
       )) }
     </div>

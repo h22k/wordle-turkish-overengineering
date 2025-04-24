@@ -1,38 +1,31 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useEffect, useState } from 'react'
+import { STATUS_COLOR } from '../../../gameConfig.js'
 
-function LetterBox({ letter, status, index, onChange, isFirstBox }) {
+function LetterBox({ letter, status, onChange, isFirstBox }) {
   const inputRef = useRef(null)
   const [ isAnimating, setIsAnimating ] = useState(false)
 
-  const statusColor = {
-    correct: 'bg-correct',
-    present: 'bg-present',
-    absent: 'bg-absent',
-    empty: 'bg-transparent border-2 border-absent',
-  }
-
   useEffect(() => {
-    if (isFirstBox) {
+    if ( isFirstBox ) {
       inputRef.current?.focus()
     }
-  }, [isFirstBox])
+  }, [ isFirstBox ])
 
   const handleChange = (e) => {
     const value = e.target.value.toUpperCase()
-    if ( /^[A-Z]$/.test(value) ) {
-      onChange(index, value)
+    if ( value && /^[A-Z]$/.test(value) ) {
+      onChange(value)
       setIsAnimating(true)
       setTimeout(() => setIsAnimating(false), 75)
-      inputRef.current.nextElementSibling?.focus()
-    }
-    else if ( value === '' ) {
-      onChange(index, '')
     }
   }
 
   const handleKeyDown = (e) => {
     if ( e.key === 'Backspace' && !letter ) {
       inputRef.current.previousElementSibling?.focus()
+    }
+    if ( e.key === 'Enter' ) {
+      e.preventDefault()
     }
   }
 
@@ -46,7 +39,7 @@ function LetterBox({ letter, status, index, onChange, isFirstBox }) {
       onKeyDown={ handleKeyDown }
       className={ `w-[52px] h-[52px] text-center uppercase font-bold text-[2rem] text-white 
         focus:outline-none transition-transform duration-75 
-        caret-transparent cursor-default select-none ${ statusColor[status] } 
+        caret-transparent cursor-default select-none ${ STATUS_COLOR[status] } 
         ${ isAnimating ? 'scale-110' : 'scale-100' }` }
     />
   )
