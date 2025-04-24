@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@theme {
+    --color-correct: #538d4e;
+    --color-present: #b59f3b;
+    --color-absent: #3a3a3c;
+    --color-background: #121213;
+    --color-keyboard: #818384;
+}
+
+#root {
+    @apply bg-background min-h-screen;
+}
