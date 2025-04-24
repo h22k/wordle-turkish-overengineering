@@ -8,4 +8,8 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    host: true,
+    allowedHosts: ['client.wordle-turkish-overengineering.orb.local']
+  }
 })
