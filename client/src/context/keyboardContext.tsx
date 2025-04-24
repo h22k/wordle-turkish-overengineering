@@ -1,20 +1,6 @@
 import React, { createContext, useContext, useState } from 'react'
 import { MAX_ATTEMPTS, WORD_LENGTH } from '../../gameConfig'
-
-type LetterStatus = 'empty' | 'correct' | 'present' | 'absent'
-
-interface Letter {
-  char: string
-  status: LetterStatus
-}
-
-interface KeyboardContextType {
-  letters: Letter[][]
-  handleClick: (value: string) => void
-  handleChange: (rowIndex: number, index: number, value: string) => void
-  currentRow: number
-  moveToNextRow: () => void
-}
+import { KeyboardContextType, LetterProps } from '../types/game'
 
 const KeyboardContext = createContext<KeyboardContextType | undefined>(undefined)
 
@@ -27,7 +13,7 @@ export const useKeyboard = () => {
 }
 
 export const KeyboardProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
-  const [ letters, setLetters ] = useState<Letter[][]>(
+  const [ letters, setLetters ] = useState<LetterProps[][]>(
     Array.from({ length: MAX_ATTEMPTS }).map(() =>
       Array.from({ length: WORD_LENGTH }).map(() => ( { char: '', status: 'empty' } )),
     ),

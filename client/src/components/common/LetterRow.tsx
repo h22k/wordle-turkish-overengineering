@@ -1,19 +1,7 @@
 import LetterBox from './LetterBox'
 import { useKeyboard } from '../../context/keyboardContext'
 import React from 'react'
-
-type LetterStatus = 'empty' | 'correct' | 'present' | 'absent'
-
-interface LetterRowProps {
-  rowIndex: number
-  isFirstRow: boolean
-  currentRow: number
-}
-
-interface LetterProps {
-  status: LetterStatus,
-  char: string
-}
+import { LetterProps, LetterRowProps } from '../../types/game'
 
 function LetterRow({ rowIndex, isFirstRow }: LetterRowProps) {
   const { letters, handleChange, currentRow } = useKeyboard()

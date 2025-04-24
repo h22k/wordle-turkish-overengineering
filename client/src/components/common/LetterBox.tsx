@@ -1,13 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { STATUS_COLOR } from '../../../gameConfig'
-
-interface LetterBoxProps {
-  letter: string
-  status: 'empty' | 'correct' | 'present' | 'absent'
-  onChange?: (value: string) => void
-  isFirstBox: boolean
-  index?: number
-}
+import { LetterBoxProps } from '../../types/game'
 
 function LetterBox({ letter, status, onChange, isFirstBox }: LetterBoxProps) {
   const inputRef = useRef<HTMLInputElement>(null)
