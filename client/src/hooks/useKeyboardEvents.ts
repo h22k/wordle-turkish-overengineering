@@ -1,0 +1,30 @@
+import { useKeyboard } from './useKeyboard'
+import React from 'react'
+
+export const useKeyboardEvents = (inputRef?: React.RefObject<HTMLInputElement>) => {
+  const { handleChange } = useKeyboard()
+
+  const processKey = (key: string) => {
+    const upperKey = key.toUpperCase()
+
+    if ( /^[A-Z]$/.test(upperKey) ) {
+      handleChange(upperKey)
+      setTimeout(() => {
+        ( inputRef?.current?.nextElementSibling as HTMLInputElement | null )?.focus()
+      }, 0)
+    }
+
+    else if ( upperKey === 'BACKSPACE' ) {
+      handleChange('BACKSPACE')
+      setTimeout(() => {
+        ( inputRef?.current?.previousElementSibling as HTMLInputElement | null )?.focus()
+      }, 0)
+    }
+
+    else if ( upperKey === 'ENTER' ) {
+      handleChange('ENTER')
+    }
+  }
+
+  return { processKey }
+}

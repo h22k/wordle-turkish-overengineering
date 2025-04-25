@@ -1,27 +1,12 @@
 import LetterBox from './LetterBox'
-import { useKeyboard } from '../../context/keyboardContext'
-import React from 'react'
-
-type LetterStatus = 'empty' | 'correct' | 'present' | 'absent'
-
-interface LetterRowProps {
-  rowIndex: number
-  isFirstRow: boolean
-  currentRow: number
-}
-
-interface LetterProps {
-  status: LetterStatus,
-  char: string
-}
+import { LetterProps, LetterRowProps } from '../../types/game'
+import { useKeyboard } from '../../hooks/useKeyboard'
 
 function LetterRow({ rowIndex, isFirstRow }: LetterRowProps) {
-  const { letters, handleChange, currentRow } = useKeyboard()
-
-  const isCurrentRow = rowIndex === currentRow
+  const { letters } = useKeyboard()
 
   return (
-    <div className="flex gap-[5px]">
+    <div className="flex gap-[5px]" id={ `row-${ rowIndex }` }>
       { letters[rowIndex].map((letter: LetterProps, index: number) => (
         <LetterBox
           key={ index }
@@ -29,7 +14,6 @@ function LetterRow({ rowIndex, isFirstRow }: LetterRowProps) {
           status={ letter.status }
           index={ index }
           isFirstBox={ isFirstRow && index === 0 }
-          onChange={ isCurrentRow ? (value) => handleChange(rowIndex, index, value) : undefined }
         />
       )) }
     </div>

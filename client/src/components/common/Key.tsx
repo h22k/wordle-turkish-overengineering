@@ -1,9 +1,5 @@
 import { IoBackspaceOutline } from 'react-icons/io5'
-
-interface KeyProps {
-  value: string
-  onClick: (value: string) => void
-}
+import { KeyProps } from '../../types/game'
 
 function Key({ value, onClick }: KeyProps) {
   return (
