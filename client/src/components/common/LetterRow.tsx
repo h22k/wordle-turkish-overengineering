@@ -1,6 +1,6 @@
 import LetterBox from './LetterBox'
-import { LetterProps, LetterRowProps } from '../../types/game'
-import { useKeyboard } from '../../hooks/useKeyboard'
+import { LetterProps, LetterRowProps } from '@/types/game'
+import { useKeyboard } from '@/hooks/useKeyboard'
 
 function LetterRow({ rowIndex, isFirstRow }: LetterRowProps) {
   const { letters, handleChange, currentRow } = useKeyboard()

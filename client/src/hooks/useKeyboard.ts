@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { KeyboardContext } from '../context/keyboardContext'
+import { KeyboardContext } from '@/context/keyboardContext'
 
 export const useKeyboard = () => {
   const context = useContext(KeyboardContext)

@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { STATUS_COLOR } from '../../../gameConfig'
-import { LetterBoxProps } from '../../types/game'
+import { LetterBoxProps } from '@/types/game'
 
 function LetterBox({ letter, status, onChange, isFirstBox }: LetterBoxProps) {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -21,14 +21,14 @@ function LetterBox({ letter, status, onChange, isFirstBox }: LetterBoxProps) {
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if ( e.key === 'Backspace' && !letter ) {
-      ( inputRef.current?.previousElementSibling as HTMLElement | null )?.focus()
-    }
-    if ( e.key === 'Enter' ) {
-      e.preventDefault()
-    }
-  }
+  // const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  //   if ( e.key === 'Backspace' && !letter ) {
+  //     ( inputRef.current?.previousElementSibling as HTMLElement | null )?.focus()
+  //   }
+  //   if ( e.key === 'Enter' ) {
+  //     e.preventDefault()
+  //   }
+  // }
 
   return (
     <input
@@ -37,7 +37,7 @@ function LetterBox({ letter, status, onChange, isFirstBox }: LetterBoxProps) {
       maxLength={ 1 }
       value={ letter }
       onChange={ handleChange }
-      onKeyDown={ handleKeyDown }
+      // onKeyDown={ handleKeyDown }
       className={ `w-[52px] h-[52px] text-center uppercase font-bold text-[2rem] text-white 
         focus:outline-none transition-transform duration-75 
         caret-transparent cursor-default select-none ${ STATUS_COLOR[status] } 

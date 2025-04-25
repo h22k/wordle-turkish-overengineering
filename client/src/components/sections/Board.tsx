@@ -1,6 +1,6 @@
 import LetterRow from '../common/LetterRow'
 import { MAX_ATTEMPTS } from '../../../gameConfig'
-import { useKeyboard } from '../../hooks/useKeyboard'
+import { useKeyboard } from '@/hooks/useKeyboard'
 
 function Board() {
   const { currentRow } = useKeyboard()

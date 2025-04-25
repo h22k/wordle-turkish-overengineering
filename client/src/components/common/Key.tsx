@@ -1,5 +1,5 @@
 import { IoBackspaceOutline } from 'react-icons/io5'
-import { KeyProps } from '../../types/game'
+import { KeyProps } from '@/types/game'
 
 function Key({ value, onClick }: KeyProps) {
   return (

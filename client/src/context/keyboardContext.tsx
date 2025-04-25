@@ -1,13 +1,13 @@
-import React, { createContext, useContext, useState } from 'react'
+import React, { createContext, useState } from 'react'
 import { MAX_ATTEMPTS, WORD_LENGTH } from '../../gameConfig'
-import { KeyboardContextType, LetterProps } from '../types/game'
+import { KeyboardContextType, LetterProps, LetterStatus } from '@/types/game'
 
 export const KeyboardContext = createContext<KeyboardContextType | undefined>(undefined)
 
 export const KeyboardProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const [ letters, setLetters ] = useState<LetterProps[][]>(
     Array.from({ length: MAX_ATTEMPTS }).map(() =>
-      Array.from({ length: WORD_LENGTH }).map(() => ( { char: '', status: 'empty' } )),
+      Array.from({ length: WORD_LENGTH }).map(() => ( { char: '', status: LetterStatus.EMPTY } )),
     ),
   )
   const [ currentRow, setCurrentRow ] = useState(0)
