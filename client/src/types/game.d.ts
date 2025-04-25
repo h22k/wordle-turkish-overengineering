@@ -1,11 +1,9 @@
-export type LetterStatus = 'empty' | 'correct' | 'present' | 'absent'
-
-// export enum LetterStatus {
-//   EMPTY = 'empty',
-//   CORRECT = 'correct',
-//   PRESENT = 'present',
-//   ABSENT = 'absent',
-// }
+export enum LetterStatus {
+  EMPTY = 'empty',
+  CORRECT = 'correct',
+  PRESENT = 'present',
+  ABSENT = 'absent',
+}
 
 export interface KeyboardContextType {
   letters: Letter[][]
