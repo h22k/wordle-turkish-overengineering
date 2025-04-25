@@ -1,4 +1,4 @@
-import { LetterStatus } from '@/types/game'
+import { LetterStatus } from './types/game'
 
 export const WORD_LENGTH: number = +import.meta.env.VITE_WORD_LENGTH
 export const MAX_ATTEMPTS: number = +import.meta.env.VITE_MAX_ATTEMPTS

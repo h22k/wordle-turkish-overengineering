@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { STATUS_COLOR } from '../../../gameConfig'
-import { LetterBoxProps } from '@/types/game'
+import { STATUS_COLOR } from '../../gameConfig'
+import { LetterBoxProps } from '../../types/game'
 
 function LetterBox({ letter, status, onChange, isFirstBox }: LetterBoxProps) {
   const inputRef = useRef<HTMLInputElement>(null)

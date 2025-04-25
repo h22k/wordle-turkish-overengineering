@@ -11,11 +11,7 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "allowJs": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "allowJs": true
   },
   "include": ["src/**/*", "vite/client.d.ts"]
 }

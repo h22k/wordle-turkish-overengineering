@@ -1,7 +1,7 @@
 import Key from '../common/Key'
-import { KEYBOARD_LAYOUT } from '../../../gameConfig'
+import { KEYBOARD_LAYOUT } from '../../gameConfig'
 import { useEffect } from 'react'
-import { useKeyboard } from '@/hooks/useKeyboard'
+import { useKeyboard } from '../../hooks/useKeyboard'
 
 function Keyboard() {
   const { handleClick } = useKeyboard()

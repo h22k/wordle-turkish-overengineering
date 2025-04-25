@@ -1,6 +1,6 @@
 import React, { createContext, useState } from 'react'
-import { MAX_ATTEMPTS, WORD_LENGTH } from '../../gameConfig'
-import { KeyboardContextType, LetterProps, LetterStatus } from '@/types/game'
+import { MAX_ATTEMPTS, WORD_LENGTH } from '../gameConfig'
+import { KeyboardContextType, LetterProps, LetterStatus } from '../types/game'
 
 export const KeyboardContext = createContext<KeyboardContextType | undefined>(undefined)
 
