@@ -1,7 +1,7 @@
 import Key from '../common/Key'
 import { KEYBOARD_LAYOUT } from '../../../gameConfig'
-import { useKeyboard } from '../../context/keyboardContext'
 import { useEffect } from 'react'
+import { useKeyboard } from '../../hooks/useKeyboard'
 
 function Keyboard() {
   const { handleClick } = useKeyboard()
@@ -10,7 +10,7 @@ function Keyboard() {
     const handleKeyDown = (e: KeyboardEvent) => {
       const key = e.key.toUpperCase()
 
-      if (['BACKSPACE', 'ENTER', ...KEYBOARD_LAYOUT?.flat()]?.includes(key)) {
+      if ( [ 'BACKSPACE', 'ENTER', ...KEYBOARD_LAYOUT?.flat() ]?.includes(key) ) {
         handleClick(key)
       }
     }

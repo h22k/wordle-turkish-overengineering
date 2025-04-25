@@ -2,15 +2,7 @@ import React, { createContext, useContext, useState } from 'react'
 import { MAX_ATTEMPTS, WORD_LENGTH } from '../../gameConfig'
 import { KeyboardContextType, LetterProps } from '../types/game'
 
-const KeyboardContext = createContext<KeyboardContextType | undefined>(undefined)
-
-export const useKeyboard = () => {
-  const context = useContext(KeyboardContext)
-  if ( !context ) {
-    throw new Error('useKeyboard must be used within a KeyboardProvider')
-  }
-  return context
-}
+export const KeyboardContext = createContext<KeyboardContextType | undefined>(undefined)
 
 export const KeyboardProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const [ letters, setLetters ] = useState<LetterProps[][]>(
