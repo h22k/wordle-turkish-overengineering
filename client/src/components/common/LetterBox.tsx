@@ -1,10 +1,12 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { STATUS_COLOR } from '../../gameConfig'
 import { LetterBoxProps } from '../../types/game'
+import { useKeyboardEvents } from '../../hooks/useKeyboardEvents'
 
-function LetterBox({ letter, status, onChange, isFirstBox }: LetterBoxProps) {
+function LetterBox({ letter, status, isFirstBox }: LetterBoxProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [ isAnimating, setIsAnimating ] = useState(false)
+  const { processKey } = useKeyboardEvents()
 
   useEffect(() => {
     if ( isFirstBox ) {
@@ -12,23 +14,15 @@ function LetterBox({ letter, status, onChange, isFirstBox }: LetterBoxProps) {
     }
   }, [ isFirstBox ])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.toUpperCase()
-    if ( value && /^[A-Z]$/.test(value) ) {
-      onChange?.(value)
-      setIsAnimating(true)
-      setTimeout(() => setIsAnimating(false), 75)
-    }
-  }
 
-  // const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-  //   if ( e.key === 'Backspace' && !letter ) {
-  //     ( inputRef.current?.previousElementSibling as HTMLElement | null )?.focus()
-  //   }
-  //   if ( e.key === 'Enter' ) {
-  //     e.preventDefault()
-  //   }
-  // }
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    processKey(e.key)
+    setIsAnimating(true)
+    setTimeout(() => {
+      ( inputRef.current?.nextElementSibling as HTMLInputElement | null )?.focus()
+      setIsAnimating(false)
+    }, 50)
+  }
 
   return (
     <input
@@ -36,12 +30,13 @@ function LetterBox({ letter, status, onChange, isFirstBox }: LetterBoxProps) {
       type="text"
       maxLength={ 1 }
       value={ letter }
-      onChange={ handleChange }
-      // onKeyDown={ handleKeyDown }
-      className={ `w-[52px] h-[52px] text-center uppercase font-bold text-[2rem] text-white 
-        focus:outline-none transition-transform duration-75 
-        caret-transparent cursor-default select-none ${ STATUS_COLOR[status] } 
-        ${ isAnimating ? 'scale-110' : 'scale-100' }` }
+      onKeyDown={ handleKeyDown }
+      className={ `
+        w-[52px] h-[52px] text-center uppercase font-bold text-[2rem] text-white
+        focus:outline-none transition-transform duration-75
+        caret-transparent cursor-default select-none ${ STATUS_COLOR[status] }
+        ${ isAnimating ? 'scale-110' : 'scale-100' }
+      ` }
     />
   )
 }

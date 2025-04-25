@@ -5,17 +5,16 @@ export enum LetterStatus {
   ABSENT = 'absent',
 }
 
-export interface KeyboardContextType {
-  letters: Letter[][]
-  handleClick: (value: string) => void
-  handleChange: (rowIndex: number, index: number, value: string) => void
-  currentRow: number
-  moveToNextRow: () => void
-}
-
 export interface LetterProps {
   status: LetterStatus
   char: string
+}
+
+export interface KeyboardContextType {
+  letters: LetterProps[][]
+  handleChange: (value: string) => void
+  currentRow: number
+  moveToNextRow: () => void
 }
 
 export interface LetterRowProps {

@@ -1,30 +1,27 @@
+import { useEffect } from 'react'
 import Key from '../common/Key'
 import { KEYBOARD_LAYOUT } from '../../gameConfig'
-import { useEffect } from 'react'
-import { useKeyboard } from '../../hooks/useKeyboard'
+import { useKeyboardEvents } from '../../hooks/useKeyboardEvents'
 
 function Keyboard() {
-  const { handleClick } = useKeyboard()
+  const { processKey } = useKeyboardEvents()
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      const key = e.key.toUpperCase()
-
-      if ( [ 'BACKSPACE', 'ENTER', ...KEYBOARD_LAYOUT?.flat() ]?.includes(key) ) {
-        handleClick(key)
-      }
+      if ( document.activeElement?.tagName === 'INPUT' ) return
+      processKey(e.key)
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [ handleClick ])
+  }, [ processKey ])
 
   return (
     <div className="flex flex-col gap-2 items-center">
       { KEYBOARD_LAYOUT.map((row, rowIndex) => (
         <div key={ rowIndex } className="flex gap-1.5">
           { row.map((key) => (
-            <Key key={ key } value={ key } onClick={ handleClick }/>
+            <Key key={ key } value={ key } onClick={ processKey }/>
           )) }
         </div>
       )) }

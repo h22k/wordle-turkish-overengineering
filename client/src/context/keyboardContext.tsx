@@ -12,9 +12,9 @@ export const KeyboardProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
   )
   const [ currentRow, setCurrentRow ] = useState(0)
 
-  const handleClick = (value: string) => {
+  const handleChange = (value: string) => {
     const updatedLetters = [ ...letters ]
-    const firstEmptyIndex = updatedLetters[currentRow].findIndex((letter) => letter.char === '')
+    const firstEmptyIndex = updatedLetters[currentRow].findIndex(letter => letter.char === '')
 
     if ( value === 'BACKSPACE' ) {
       if ( firstEmptyIndex === -1 ) {
@@ -26,22 +26,12 @@ export const KeyboardProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
       setLetters(updatedLetters)
     }
     else if ( value === 'ENTER' ) {
-      const currentRowLetters = updatedLetters[currentRow]
-      const filledLetters = currentRowLetters.filter(letter => letter.char !== '')
-
-      if ( filledLetters.length === WORD_LENGTH ) {
+      const filled = updatedLetters[currentRow].filter(letter => letter.char !== '')
+      if ( filled.length === WORD_LENGTH ) {
         moveToNextRow()
       }
       else {
-        // toast.error('Not enough letters', {
-        //   position: 'top-center',
-        //   autoClose: 3000,
-        //   hideProgressBar: true,
-        //   closeOnClick: true,
-        // })
-
         document.getElementById(`row-${ currentRow }`)?.classList.add('animate-shake')
-
         setTimeout(() => {
           document.getElementById(`row-${ currentRow }`)?.classList.remove('animate-shake')
         }, 500)
@@ -55,12 +45,6 @@ export const KeyboardProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
     }
   }
 
-  const handleChange = (rowIndex: number, index: number, value: string) => {
-    const updatedLetters = [ ...letters ]
-    updatedLetters[rowIndex][index].char = value
-    setLetters(updatedLetters)
-  }
-
   const moveToNextRow = () => {
     if ( currentRow < MAX_ATTEMPTS - 1 ) {
       setCurrentRow(currentRow + 1)
@@ -68,7 +52,7 @@ export const KeyboardProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
   }
 
   return (
-    <KeyboardContext.Provider value={ { letters, handleClick, handleChange, currentRow, moveToNextRow } }>
+    <KeyboardContext.Provider value={ { letters, handleChange, currentRow, moveToNextRow } }>
       { children }
     </KeyboardContext.Provider>
   )
