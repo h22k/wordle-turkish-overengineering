@@ -37,7 +37,7 @@ func NewGame(word Word) Game {
 	return Game{
 		ID:             uuid.New(),
 		Word:           word,
-		WordGuesses:    make([]WordGuess, word.Len()+1),
+		WordGuesses:    make([]WordGuess, 0, word.Len()+1),
 		MaxWordGuesses: word.Len() + 1,
 	}
 }
