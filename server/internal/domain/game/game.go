@@ -47,11 +47,11 @@ func (g *Game) MakeGuess(guess Word) error {
 		return LengthIsInCorrectErr
 	}
 
-	if g.GuessedCorrectly() {
+	if g.guessedCorrectly() {
 		return AlreadyGuessedCorrectlyErr
 	}
 
-	if g.GuessExceeded() {
+	if g.guessExceeded() {
 		return MaxWordGuessesExceededErr
 	}
 
@@ -61,10 +61,10 @@ func (g *Game) MakeGuess(guess Word) error {
 	return nil
 }
 
-func (g *Game) GuessedCorrectly() bool {
+func (g *Game) guessedCorrectly() bool {
 	return len(g.WordGuesses) >= 1 && g.WordGuesses[len(g.WordGuesses)-1].IsCorrect()
 }
 
-func (g *Game) GuessExceeded() bool {
+func (g *Game) guessExceeded() bool {
 	return len(g.WordGuesses) >= int(g.MaxWordGuesses)
 }
