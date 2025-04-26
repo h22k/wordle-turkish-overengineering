@@ -33,7 +33,7 @@ func TestGame_MakeGuess(t *testing.T) {
 				guess: "hell",
 			},
 			wantErr: true,
-			err:     LengthIsInCorrectErr,
+			err:     LengthIsIncorrectErr,
 		},
 		{
 			name: "Should return error when word length is incorrect with spaces",
@@ -44,7 +44,7 @@ func TestGame_MakeGuess(t *testing.T) {
 				guess: "hell ",
 			},
 			wantErr: true,
-			err:     LengthIsInCorrectErr,
+			err:     LengthIsIncorrectErr,
 		},
 		{
 			name: "Should return error when already guessed correctly",

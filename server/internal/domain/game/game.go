@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	LengthIsInCorrectErr       = errors.New("length is incorrect")
+	LengthIsIncorrectErr       = errors.New("length is incorrect")
 	MaxWordGuessesExceededErr  = errors.New("max word guesses exceeded")
 	AlreadyGuessedCorrectlyErr = errors.New("already guessed correctly")
 )
@@ -44,7 +44,7 @@ func NewGame(word Word) Game {
 
 func (g *Game) MakeGuess(guess Word) error {
 	if g.Word.Len() != guess.Len() {
-		return LengthIsInCorrectErr
+		return LengthIsIncorrectErr
 	}
 
 	if g.guessedCorrectly() {
