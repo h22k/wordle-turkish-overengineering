@@ -4,6 +4,10 @@ services:
       context: server
       dockerfile: Dockerfile
     container_name: go-server
+    develop:
+      watch:
+        - action: rebuild
+          path: ./server/go.mod
     depends_on:
       - database
       - cache
@@ -18,6 +22,10 @@ services:
     image: postgres:17.4-alpine3.21
     restart: always
     container_name: database
+    networks:
+      - wordle-network
+    ports:
+      - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
     environment:
@@ -39,11 +47,15 @@ services:
       context: client
       dockerfile: Dockerfile
     container_name: react-client
+    develop:
+      watch:
+        - action: rebuild
+          path: ./client/package.json
     depends_on:
       - server
     volumes:
       - ./client:/app
-      - /app/node_modules # for ide's autocomplete ability
+      - /app/node_modules
     ports:
       - "5173:5173"
     networks:

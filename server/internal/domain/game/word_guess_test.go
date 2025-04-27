@@ -69,6 +69,8 @@ func TestNewWordGuess(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			wordGuess := NewWordGuess(tt.args.word, tt.args.guess)
 			assert.Equal(t, tt.letterCount, len(wordGuess.Letters))
 
@@ -115,6 +117,8 @@ func Test_letterFrequencies(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equalf(t, tt.want, letterFrequencies(tt.args.word), "letterFrequencies(%v)", tt.args.word)
 		})
 	}
