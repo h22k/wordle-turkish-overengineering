@@ -12,13 +12,14 @@ CREATE TABLE games
 
 CREATE TABLE guesses
 (
-    id             UUID PRIMARY KEY                  DEFAULT gen_random_uuid(),
+    id             SERIAL PRIMARY KEY,
     game_id        UUID                     NOT NULL REFERENCES games (id) ON DELETE CASCADE,
     word           VARCHAR(7)               NOT NULL,
     attempt_number INT                      NOT NULL,
     session_id     VARCHAR(255)             NOT NULL,
     created_at     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    UNIQUE (game_id, attempt_number, session_id)
+    UNIQUE (game_id, attempt_number, session_id),
+    UNIQUE (game_id, session_id, word)
 );
 
 
