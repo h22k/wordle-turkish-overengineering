@@ -99,17 +99,32 @@ func TestGame_MakeGuess(t *testing.T) {
 			wantErr: false,
 			err:     nil,
 		},
+		{
+			name: "Should return no error with turkish letters",
+			fields: fields{
+				Word:           "hello",
+				MaxWordGuesses: 6,
+				WordGuesses:    []WordGuess{},
+			},
+			args: args{
+				guess: "şçğüö",
+			},
+			wantErr: false,
+			err:     nil,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			g := Game{
 				ID:             tt.fields.Id,
 				Word:           tt.fields.Word,
 				WordGuesses:    tt.fields.WordGuesses,
 				MaxWordGuesses: tt.fields.MaxWordGuesses,
 			}
-			err := g.MakeGuess(tt.args.guess)
+			_, err := g.MakeGuess(tt.args.guess)
 			assert.Equal(t, tt.wantErr, err != nil)
 			if tt.wantErr {
 				assert.ErrorIs(t, err, tt.err)

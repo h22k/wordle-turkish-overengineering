@@ -4,20 +4,31 @@ services:
       context: server
       dockerfile: Dockerfile
     container_name: go-server
+    develop:
+      watch:
+        - action: rebuild
+          path: ./server/go.mod
     depends_on:
       - database
       - cache
+      - grafana
+      - pyroscope
     volumes:
       - ./server:/app
       - ~/.air:/root/.air
     ports:
       - "8080:8080"
+      - "6060:6060"
     networks:
       - wordle-network
   database:
     image: postgres:17.4-alpine3.21
     restart: always
     container_name: database
+    networks:
+      - wordle-network
+    ports:
+      - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
     environment:
@@ -39,15 +50,45 @@ services:
       context: client
       dockerfile: Dockerfile
     container_name: react-client
+    develop:
+      watch:
+        - action: rebuild
+          path: ./client/package.json
     depends_on:
       - server
     volumes:
       - ./client:/app
-      - /app/node_modules # for ide's autocomplete ability
+      - /app/node_modules
     ports:
       - "5173:5173"
     networks:
       - wordle-network
+  pyroscope:
+    image: grafana/pyroscope:latest
+    networks:
+      - wordle-network
+    ports:
+      - "4040:4040"
+    command:
+      - "server"
+  grafana:
+    image: grafana/grafana:latest
+    networks:
+      - wordle-network
+    ports:
+      - "3000:3000"
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./server/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - server
+    networks:
+      - wordle-network
+
 volumes:
   db_data:
     driver: local

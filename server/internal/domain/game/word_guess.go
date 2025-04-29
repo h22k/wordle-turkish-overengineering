@@ -31,18 +31,20 @@ func NewWordGuess(word, guess Word) WordGuess {
 	letterMap := letterFrequencies(word)
 	runeWord := []rune(word.String())
 
-	for i, char := range guess.String() {
+	runeIndex := 0
+	for _, char := range guess {
 		switch true {
-		case runeWord[i] == char:
-			letters[i] = NewLetter(char, Correct)
+		case runeWord[runeIndex] == char:
+			letters[runeIndex] = NewLetter(char, Correct)
 			break
 		case letterMap[char] > 0:
-			letters[i] = NewLetter(char, Present)
+			letters[runeIndex] = NewLetter(char, Present)
 			letterMap[char]--
 			break
 		default:
-			letters[i] = NewLetter(char, Absent)
+			letters[runeIndex] = NewLetter(char, Absent)
 		}
+		runeIndex++
 	}
 
 	return WordGuess{
