@@ -15,15 +15,24 @@ type GameService struct {
 
 	gameQuery          *query.GameQuery
 	randomVocableQuery *query.RandomVocableQuery
+	guessQuery         *query.GuessQuery
 }
 
-func NewGameService(makeGuessCommand *command.MakeGuessCommand, newGameCommand *command.NewGameCommand, addWordCommand *command.AddWordCommand, gameQuery *query.GameQuery, randomVocableQuery *query.RandomVocableQuery) GameService {
+func NewGameService(
+	makeGuessCommand *command.MakeGuessCommand,
+	newGameCommand *command.NewGameCommand,
+	addWordCommand *command.AddWordCommand,
+	gameQuery *query.GameQuery,
+	randomVocableQuery *query.RandomVocableQuery,
+	guessQuery *query.GuessQuery,
+) GameService {
 	return GameService{
 		makeGuessCommand:   makeGuessCommand,
 		newGameCommand:     newGameCommand,
 		addWordCommand:     addWordCommand,
 		gameQuery:          gameQuery,
 		randomVocableQuery: randomVocableQuery,
+		guessQuery:         guessQuery,
 	}
 }
 
@@ -34,7 +43,23 @@ func (gs GameService) MakeGuess(ctx context.Context, input MakeGuessInput) (comm
 		return command.MakeGuessResult{}, err
 	}
 
+	guesses, err := gs.guessQuery.GetGameGuesses(ctx, game, input.SessionId)
+
+	if err != nil {
+		return command.MakeGuessResult{}, err
+	}
+
+	err = game.SetGuesses(guesses)
+
+	if err != nil {
+		return command.MakeGuessResult{}, err
+	}
+
 	return gs.makeGuessCommand.Execute(ctx, makeGuessInputToCommandInput(input, game))
+}
+
+func (gs GameService) GetGameGuesses(ctx context.Context, game domain.Game, sessionId string) ([]domain.WordGuess, error) {
+	return gs.guessQuery.GetGameGuesses(ctx, game, sessionId)
 }
 
 func (gs GameService) CreateGame(ctx context.Context) (command.CreateGameResult, error) {

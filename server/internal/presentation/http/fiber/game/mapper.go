@@ -12,3 +12,14 @@ func lettersToView(letters []domain.Letter) []LetterView {
 	}
 	return result
 }
+
+func guessesToResponse(guesses []domain.WordGuess) []GuessedWordResponse {
+	result := make([]GuessedWordResponse, len(guesses))
+	for i, g := range guesses {
+		result[i] = GuessedWordResponse{
+			Word:    g.Guess.String(),
+			Letters: lettersToView(g.Letters),
+		}
+	}
+	return result
+}

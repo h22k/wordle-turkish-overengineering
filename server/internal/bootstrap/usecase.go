@@ -27,6 +27,7 @@ type usecase struct {
 
 	gameQuery          *query.GameQuery
 	randomVocableQuery *query.RandomVocableQuery
+	guessQuery         *query.GuessQuery
 }
 
 func initUseCases(db db, cache cache, wv wordValidator) *usecase {
@@ -37,7 +38,12 @@ func initUseCases(db db, cache cache, wv wordValidator) *usecase {
 
 		gameQuery:          query.NewGameQuery(db.gameRepository(), cache.gameCacheRepository()),
 		randomVocableQuery: query.NewRandomVocableQuery(db.vocableRepository()),
+		guessQuery:         query.NewGuessQuery(db.guessRepository()),
 	}
+}
+
+func (u usecase) GuessQuery() *query.GuessQuery {
+	return u.guessQuery
 }
 
 func (u usecase) AddWordCommand() *command.AddWordCommand {

@@ -13,6 +13,7 @@ type ucase interface {
 
 	GameQuery() *query.GameQuery
 	RandomVocableQuery() *query.RandomVocableQuery
+	GuessQuery() *query.GuessQuery
 }
 
 type appService struct {
@@ -27,6 +28,7 @@ func initService(uc ucase) *appService {
 			uc.AddWordCommand(),
 			uc.GameQuery(),
 			uc.RandomVocableQuery(),
+			uc.GuessQuery(),
 		),
 	}
 }

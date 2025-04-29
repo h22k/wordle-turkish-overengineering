@@ -1,8 +1,6 @@
 package game
 
 import (
-	"fmt"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/h22k/wordle-turkish-overengineering/server/internal/application/validator"
 	response "github.com/h22k/wordle-turkish-overengineering/server/internal/presentation/http/fiber"
@@ -32,7 +30,9 @@ func (h *Handler) GetGame() fiber.Handler {
 		}
 
 		return response.Success(c, ActiveGameResponse{
-			MaxGuesses: game.MaxWordGuesses,
+			MaxGuesses:     game.MaxWordGuesses,
+			IsGameFinished: game.GuessedCorrectly() || game.GuessExceeded(),
+			Guesses:        guessesToResponse(game.WordGuesses),
 		})
 	}
 }
@@ -55,8 +55,6 @@ func (h *Handler) MakeGuess() fiber.Handler {
 		if err != nil {
 			return response.BadRequest(c, err)
 		}
-
-		fmt.Println(guess.Letters)
 
 		return response.Created(c, GuessedWordResponse{
 			Word:    guess.Guess.String(),

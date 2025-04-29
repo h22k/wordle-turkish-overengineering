@@ -24,6 +24,18 @@ func (s *Service) GetGameInfo(ctx context.Context, sessionId string) (domain.Gam
 		return domain.EmptyGame, err
 	}
 
+	guesses, err := s.gameService.GetGameGuesses(ctx, game, sessionId)
+
+	if err != nil {
+		return domain.EmptyGame, err
+	}
+
+	err = game.SetGuesses(guesses)
+
+	if err != nil {
+		return domain.EmptyGame, err
+	}
+
 	return game, nil
 }
 

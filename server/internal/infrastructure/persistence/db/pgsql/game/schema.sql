@@ -18,7 +18,8 @@ CREATE TABLE guesses
     attempt_number INT                      NOT NULL,
     session_id     VARCHAR(255)             NOT NULL,
     created_at     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    UNIQUE (game_id, attempt_number, session_id)
+    UNIQUE (game_id, attempt_number, session_id),
+    UNIQUE (game_id, session_id, word)
 );
 
 

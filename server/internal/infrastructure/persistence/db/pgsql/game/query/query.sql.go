@@ -13,7 +13,8 @@ import (
 
 const addWordToPool = `-- name: AddWordToPool :one
 INSERT INTO word_pool (word, is_answer, is_valid)
-VALUES ($1, $2, $3) RETURNING id, word, is_answer, is_valid
+VALUES ($1, $2, $3)
+RETURNING id, word, is_answer, is_valid
 `
 
 type AddWordToPoolParams struct {
@@ -36,7 +37,8 @@ func (q *Queries) AddWordToPool(ctx context.Context, arg AddWordToPoolParams) (W
 
 const createGame = `-- name: CreateGame :one
 INSERT INTO games (secret_word, max_attempts, word_length)
-VALUES ($1, $2, $3) RETURNING id, secret_word, word_length, max_attempts, is_active, created_at, updated_at
+VALUES ($1, $2, $3)
+RETURNING id, secret_word, word_length, max_attempts, is_active, created_at, updated_at
 `
 
 type CreateGameParams struct {
@@ -62,7 +64,8 @@ func (q *Queries) CreateGame(ctx context.Context, arg CreateGameParams) (Game, e
 
 const createGuess = `-- name: CreateGuess :one
 INSERT INTO guesses (game_id, word, attempt_number, session_id)
-VALUES ($1, $2, $3, $4) RETURNING id, game_id, word, attempt_number, session_id, created_at
+VALUES ($1, $2, $3, $4)
+RETURNING id, game_id, word, attempt_number, session_id, created_at
 `
 
 type CreateGuessParams struct {
@@ -116,7 +119,8 @@ const getActiveGame = `-- name: GetActiveGame :one
 SELECT id, secret_word, word_length, max_attempts, is_active, created_at, updated_at
 FROM games
 WHERE is_active = true
-ORDER BY created_at DESC LIMIT 1
+ORDER BY created_at DESC
+LIMIT 1
 `
 
 func (q *Queries) GetActiveGame(ctx context.Context) (Game, error) {
@@ -230,7 +234,7 @@ const getGameGuessesCount = `-- name: GetGameGuessesCount :one
 SELECT COUNT(id)
 FROM guesses
 WHERE game_id = $1
-AND session_id = $2
+  AND session_id = $2
 `
 
 type GetGameGuessesCountParams struct {
@@ -249,7 +253,8 @@ const getRandomSecretWord = `-- name: GetRandomSecretWord :one
 SELECT word
 FROM word_pool
 WHERE is_answer = true
-ORDER BY RANDOM() LIMIT 1
+ORDER BY RANDOM()
+LIMIT 1
 `
 
 func (q *Queries) GetRandomSecretWord(ctx context.Context) (string, error) {
@@ -277,7 +282,8 @@ const makeGameInactive = `-- name: MakeGameInactive :one
 UPDATE games
 SET is_active  = false,
     updated_at = NOW()
-WHERE id = $1 RETURNING id, secret_word, word_length, max_attempts, is_active, created_at, updated_at
+WHERE id = $1
+RETURNING id, secret_word, word_length, max_attempts, is_active, created_at, updated_at
 `
 
 func (q *Queries) MakeGameInactive(ctx context.Context, id uuid.UUID) (Game, error) {
