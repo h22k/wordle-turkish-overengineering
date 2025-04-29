@@ -99,6 +99,19 @@ func TestGame_MakeGuess(t *testing.T) {
 			wantErr: false,
 			err:     nil,
 		},
+		{
+			name: "Should return no error with turkish letters",
+			fields: fields{
+				Word:           "hello",
+				MaxWordGuesses: 6,
+				WordGuesses:    []WordGuess{},
+			},
+			args: args{
+				guess: "şçğüö",
+			},
+			wantErr: false,
+			err:     nil,
+		},
 	}
 
 	for _, tt := range tests {
