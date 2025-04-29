@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/google/uuid"
 )
@@ -16,6 +17,7 @@ var (
 	LengthIsIncorrectErr       = errors.New("length is incorrect")
 	MaxWordGuessesExceededErr  = errors.New("max word guesses exceeded")
 	AlreadyGuessedCorrectlyErr = errors.New("already guessed correctly")
+	SameGuessErr               = errors.New("same guess")
 )
 
 var EmptyGame Game
@@ -26,7 +28,7 @@ func (w Word) Len() uint8 {
 	wstr := string(w)
 	wstr = strings.ToLower(wstr)
 	wstr = strings.Trim(wstr, " ")
-	return uint8(len(wstr))
+	return uint8(utf8.RuneCountInString(wstr))
 }
 
 func (w Word) String() string {
@@ -58,12 +60,18 @@ func (g *Game) MakeGuess(guess Word) (WordGuess, error) {
 		return WordGuess{}, LengthIsIncorrectErr
 	}
 
-	if g.guessedCorrectly() {
+	if g.GuessedCorrectly() {
 		return WordGuess{}, AlreadyGuessedCorrectlyErr
 	}
 
-	if g.guessExceeded() {
+	if g.GuessExceeded() {
 		return WordGuess{}, MaxWordGuessesExceededErr
+	}
+
+	for _, g := range g.WordGuesses {
+		if g.Guess.String() == guess.String() {
+			return WordGuess{}, SameGuessErr
+		}
 	}
 
 	wordGuess := NewWordGuess(g.Word, guess)
@@ -72,10 +80,26 @@ func (g *Game) MakeGuess(guess Word) (WordGuess, error) {
 	return wordGuess, nil
 }
 
-func (g *Game) guessedCorrectly() bool {
+func (g *Game) SetGuesses(guesses []WordGuess) error {
+	if len(guesses) > int(g.MaxWordGuesses) {
+		return MaxWordGuessesExceededErr
+	}
+
+	for _, guess := range guesses {
+		if g.Word.Len() != guess.Guess.Len() {
+			return LengthIsIncorrectErr
+		}
+	}
+
+	g.WordGuesses = guesses
+
+	return nil
+}
+
+func (g *Game) GuessedCorrectly() bool {
 	return len(g.WordGuesses) >= 1 && g.WordGuesses[len(g.WordGuesses)-1].IsCorrect()
 }
 
-func (g *Game) guessExceeded() bool {
+func (g *Game) GuessExceeded() bool {
 	return len(g.WordGuesses) >= int(g.MaxWordGuesses)
 }
