@@ -10,6 +10,12 @@ type MakeGuessCommand struct {
 	GuessRepository domain.GuessRepository
 }
 
+func NewMakeGuessCommand(guessRepo domain.GuessRepository, gameRepo domain.GameRepository) *MakeGuessCommand {
+	return &MakeGuessCommand{
+		GuessRepository: guessRepo,
+	}
+}
+
 func (mgc MakeGuessCommand) Execute(ctx context.Context, input MakeGuessInput) (MakeGuessResult, error) {
 	guessWord := input.Guess
 	guess, err := input.Game.MakeGuess(guessWord)

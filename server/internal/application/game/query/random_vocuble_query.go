@@ -10,6 +10,12 @@ type RandomVocableQuery struct {
 	VocableRepository domain.VocableRepository
 }
 
+func NewRandomVocableQuery(vocableRepo domain.VocableRepository) *RandomVocableQuery {
+	return &RandomVocableQuery{
+		VocableRepository: vocableRepo,
+	}
+}
+
 func (rvq RandomVocableQuery) GetDailyWord(ctx context.Context) (domain.Word, error) {
 	vocable, err := rvq.VocableRepository.FindRandom(ctx)
 

@@ -12,6 +12,12 @@ type GuessRepository struct {
 	queries *query.Queries
 }
 
+func NewGuessRepository(queries *query.Queries) *GuessRepository {
+	return &GuessRepository{
+		queries: queries,
+	}
+}
+
 func (g GuessRepository) Save(ctx context.Context, guess domain.WordGuess, game domain.Game, sessionId string) error {
 	guessCount, err := g.queries.GetGameGuessesCount(ctx, query.GetGameGuessesCountParams{
 		GameID:    game.ID,

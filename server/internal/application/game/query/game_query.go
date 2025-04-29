@@ -11,18 +11,31 @@ type GameQuery struct {
 	GameCacheRepo domain.GameCacheRepository
 }
 
+func NewGameQuery(gameRepo domain.GameRepository, gameCacheRepo domain.GameCacheRepository) *GameQuery {
+	return &GameQuery{
+		GameRepo:      gameRepo,
+		GameCacheRepo: gameCacheRepo,
+	}
+}
+
 func (gq *GameQuery) GetLastGame(ctx context.Context) (domain.Game, error) {
-	game, err := gq.GameCacheRepo.Get(ctx)
+	if gq.GameCacheRepo == nil {
+		return gq.lastGameFromDb(ctx)
+	}
+
+	game, err := gq.lastGameFromCache(ctx)
 
 	if err == nil {
-		return game, err
+		return game, nil
 	}
 
-	game, err = gq.GameRepo.GetLastGame(ctx)
+	return gq.lastGameFromDb(ctx)
+}
 
-	if err != nil {
-		return domain.EmptyGame, err
-	}
+func (gq *GameQuery) lastGameFromCache(ctx context.Context) (domain.Game, error) {
+	return gq.GameCacheRepo.Get(ctx)
+}
 
-	return game, nil
+func (gq *GameQuery) lastGameFromDb(ctx context.Context) (domain.Game, error) {
+	return gq.GameRepo.GetLastGame(ctx)
 }

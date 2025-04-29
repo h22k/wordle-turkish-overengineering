@@ -230,8 +230,7 @@ const getGameGuessesCount = `-- name: GetGameGuessesCount :one
 SELECT COUNT(id)
 FROM guesses
 WHERE game_id = $1
-  AND session_id = $2
-ORDER BY attempt_number ASC
+AND session_id = $2
 `
 
 type GetGameGuessesCountParams struct {

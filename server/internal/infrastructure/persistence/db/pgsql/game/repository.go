@@ -11,8 +11,8 @@ type Repository struct {
 	queries *query.Queries
 }
 
-func NewRepository(queries *query.Queries) Repository {
-	return Repository{
+func NewRepository(queries *query.Queries) *Repository {
+	return &Repository{
 		queries: queries,
 	}
 }

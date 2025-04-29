@@ -10,8 +10,8 @@ type AddWordCommand struct {
 	WordRepo domain.VocableRepository
 }
 
-func NewAddWordCommand(wordRepo domain.VocableRepository) AddWordCommand {
-	return AddWordCommand{
+func NewAddWordCommand(wordRepo domain.VocableRepository) *AddWordCommand {
+	return &AddWordCommand{
 		WordRepo: wordRepo,
 	}
 }

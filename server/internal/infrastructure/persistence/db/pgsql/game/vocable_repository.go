@@ -11,8 +11,8 @@ type VocableRepository struct {
 	query *query.Queries
 }
 
-func NewVocableRepository(q *query.Queries) VocableRepository {
-	return VocableRepository{
+func NewVocableRepository(q *query.Queries) *VocableRepository {
+	return &VocableRepository{
 		query: q,
 	}
 }

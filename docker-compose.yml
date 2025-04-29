@@ -11,11 +11,14 @@ services:
     depends_on:
       - database
       - cache
+      - grafana
+      - pyroscope
     volumes:
       - ./server:/app
       - ~/.air:/root/.air
     ports:
       - "8080:8080"
+      - "6060:6060"
     networks:
       - wordle-network
   database:
@@ -60,6 +63,32 @@ services:
       - "5173:5173"
     networks:
       - wordle-network
+  pyroscope:
+    image: grafana/pyroscope:latest
+    networks:
+      - wordle-network
+    ports:
+      - "4040:4040"
+    command:
+      - "server"
+  grafana:
+    image: grafana/grafana:latest
+    networks:
+      - wordle-network
+    ports:
+      - "3000:3000"
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./server/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - server
+    networks:
+      - wordle-network
+
 volumes:
   db_data:
     driver: local
