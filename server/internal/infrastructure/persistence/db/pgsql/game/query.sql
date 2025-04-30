@@ -67,3 +67,9 @@ WHERE is_answer = true;
 SELECT word
 FROM word_pool
 WHERE is_valid = true;
+
+-- name: FindWord :one
+SELECT *
+FROM word_pool
+WHERE is_valid = true
+  AND word = $1;

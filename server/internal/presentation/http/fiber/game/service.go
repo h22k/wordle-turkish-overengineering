@@ -8,12 +8,15 @@ import (
 )
 
 type Service struct {
-	gameService application.GameService
+	gameService *application.GameService
+
+	wordChecker *domain.WordCheckerChain
 }
 
-func NewService(gameService application.GameService) *Service {
+func NewService(gameService *application.GameService, checker *domain.WordCheckerChain) *Service {
 	return &Service{
 		gameService: gameService,
+		wordChecker: checker,
 	}
 }
 
@@ -38,6 +41,12 @@ func (s *Service) GetGameInfo(ctx context.Context, sessionId string) (domain.Gam
 }
 
 func (s *Service) MakeGuess(ctx context.Context, sessionId string, guess string) (domain.WordGuess, error) {
+	err := s.wordChecker.Check(ctx, domain.Word(guess))
+
+	if err != nil {
+		return domain.WordGuess{}, err
+	}
+
 	result, err := s.gameService.MakeGuess(ctx, application.MakeGuessInput{
 		SessionId: sessionId,
 		Word:      guess,

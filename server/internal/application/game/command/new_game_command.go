@@ -9,22 +9,16 @@ import (
 type NewGameCommand struct {
 	GameRepo      domain.GameRepository
 	GameCacheRepo domain.GameCacheRepository
-	WordValidator domain.WordValidator
 }
 
-func NewNewGameCommand(gameRepo domain.GameRepository, gameCacheRepo domain.GameCacheRepository, wordValidator domain.WordValidator) *NewGameCommand {
+func NewNewGameCommand(gameRepo domain.GameRepository, gameCacheRepo domain.GameCacheRepository) *NewGameCommand {
 	return &NewGameCommand{
 		GameRepo:      gameRepo,
 		GameCacheRepo: gameCacheRepo,
-		WordValidator: wordValidator,
 	}
 }
 
 func (ngc NewGameCommand) Execute(ctx context.Context, word domain.Word) (CreateGameResult, error) {
-	if err := ngc.WordValidator.Validate(ctx, word); err != nil {
-		return CreateGameResult{}, err
-	}
-
 	game := domain.NewGame(word)
 	err := ngc.GameRepo.Save(ctx, game)
 

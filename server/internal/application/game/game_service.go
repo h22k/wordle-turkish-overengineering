@@ -11,22 +11,22 @@ import (
 type GameService struct {
 	makeGuessCommand *command.MakeGuessCommand
 	newGameCommand   *command.NewGameCommand
-	addWordCommand   *command.AddWordCommand
+	addWordCommand   *command.WordCommand
 
 	gameQuery          *query.GameQuery
-	randomVocableQuery *query.RandomVocableQuery
+	randomVocableQuery *query.VocableQuery
 	guessQuery         *query.GuessQuery
 }
 
 func NewGameService(
 	makeGuessCommand *command.MakeGuessCommand,
 	newGameCommand *command.NewGameCommand,
-	addWordCommand *command.AddWordCommand,
+	addWordCommand *command.WordCommand,
 	gameQuery *query.GameQuery,
-	randomVocableQuery *query.RandomVocableQuery,
+	randomVocableQuery *query.VocableQuery,
 	guessQuery *query.GuessQuery,
-) GameService {
-	return GameService{
+) *GameService {
+	return &GameService{
 		makeGuessCommand:   makeGuessCommand,
 		newGameCommand:     newGameCommand,
 		addWordCommand:     addWordCommand,
@@ -77,7 +77,7 @@ func (gs GameService) CreateGame(ctx context.Context) (command.CreateGameResult,
 }
 
 func (gs GameService) AddWord(ctx context.Context, word domain.Word) error {
-	return gs.addWordCommand.Execute(ctx, word)
+	return gs.addWordCommand.AddWord(ctx, word)
 }
 
 func (gs GameService) LastGame(ctx context.Context) (domain.Game, error) {
