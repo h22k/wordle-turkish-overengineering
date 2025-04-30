@@ -30,9 +30,7 @@ func (s *Service) GetGameInfo(ctx context.Context, sessionId string) (domain.Gam
 		return domain.EmptyGame, err
 	}
 
-	err = game.SetGuesses(guesses)
-
-	if err != nil {
+	if err = game.SetGuesses(guesses); err != nil {
 		return domain.EmptyGame, err
 	}
 

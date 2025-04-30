@@ -49,9 +49,7 @@ func (gs GameService) MakeGuess(ctx context.Context, input MakeGuessInput) (comm
 		return command.MakeGuessResult{}, err
 	}
 
-	err = game.SetGuesses(guesses)
-
-	if err != nil {
+	if err = game.SetGuesses(guesses); err != nil {
 		return command.MakeGuessResult{}, err
 	}
 

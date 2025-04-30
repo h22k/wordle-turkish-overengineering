@@ -48,6 +48,10 @@ func InitApplication(ctx context.Context, cfg config.Config) *Application {
 	}
 }
 
+func (a *Application) AppService() *appService {
+	return a.appService
+}
+
 func (a *Application) SetRoutes() {
 	go a.setProfiler()
 
