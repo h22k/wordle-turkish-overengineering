@@ -10,7 +10,7 @@ type MakeGuessCommand struct {
 	GuessRepository domain.GuessRepository
 }
 
-func NewMakeGuessCommand(guessRepo domain.GuessRepository, gameRepo domain.GameRepository) *MakeGuessCommand {
+func NewMakeGuessCommand(guessRepo domain.GuessRepository) *MakeGuessCommand {
 	return &MakeGuessCommand{
 		GuessRepository: guessRepo,
 	}

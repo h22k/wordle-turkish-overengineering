@@ -1,4 +1,4 @@
-.PHONY: start stop server-test migrate
+.PHONY: start stop server-test migrate word-seed
 
 MIGRATIONS_DIR=./server/internal/infrastructure/persistence/db/pgsql/migrations
 NETWORK=wordle-turkish-overengineering_wordle-network
@@ -20,3 +20,11 @@ server-test:
 migrate:
 	docker run --rm -v $(MIGRATIONS_DIR):/migrations --network $(NETWORK) \
 		$(MIGRATE_IMAGE) -path=/migrations -database=$(DB_URL) up
+word-seed:
+	docker run --rm \
+	  --name task-runner \
+	  --network wordle-turkish-overengineering_wordle-network \
+	  -v ./server:/app \
+	  --env-file ./server/.env \
+	  wordle-turkish-overengineering-server \
+	  go run cmd/word/main.go

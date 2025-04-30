@@ -34,7 +34,7 @@ func initUseCases(db db, cache cache, wv wordValidator) *usecase {
 	return &usecase{
 		addWordCommand:   command.NewAddWordCommand(db.vocableRepository()),
 		newGameCommand:   command.NewNewGameCommand(db.gameRepository(), cache.gameCacheRepository(), wv.validator()),
-		makeGuessCommand: command.NewMakeGuessCommand(db.guessRepository(), db.gameRepository()),
+		makeGuessCommand: command.NewMakeGuessCommand(db.guessRepository()),
 
 		gameQuery:          query.NewGameQuery(db.gameRepository(), cache.gameCacheRepository()),
 		randomVocableQuery: query.NewRandomVocableQuery(db.vocableRepository()),

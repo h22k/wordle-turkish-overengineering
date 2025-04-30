@@ -32,3 +32,7 @@ func initService(uc ucase) *appService {
 		),
 	}
 }
+
+func (as appService) GameService() application.GameService {
+	return as.gameService
+}
