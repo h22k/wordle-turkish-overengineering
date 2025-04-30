@@ -64,7 +64,7 @@ func readLine(word chan<- domain.Word) {
 		if strings.Contains(text, " ") {
 			continue
 		}
-		word <- domain.Word(strings.ToLower(scanner.Text()))
+		word <- domain.Word(strings.ToLower(text))
 	}
 
 	close(word)
