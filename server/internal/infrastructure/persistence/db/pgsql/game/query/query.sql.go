@@ -115,6 +115,25 @@ func (q *Queries) FindGameById(ctx context.Context, id uuid.UUID) (Game, error) 
 	return i, err
 }
 
+const findWord = `-- name: FindWord :one
+SELECT id, word, is_answer, is_valid
+FROM word_pool
+WHERE is_valid = true
+  AND word = $1
+`
+
+func (q *Queries) FindWord(ctx context.Context, word string) (WordPool, error) {
+	row := q.db.QueryRow(ctx, findWord, word)
+	var i WordPool
+	err := row.Scan(
+		&i.ID,
+		&i.Word,
+		&i.IsAnswer,
+		&i.IsValid,
+	)
+	return i, err
+}
+
 const getActiveGame = `-- name: GetActiveGame :one
 SELECT id, secret_word, word_length, max_attempts, is_active, created_at, updated_at
 FROM games

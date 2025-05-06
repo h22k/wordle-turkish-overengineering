@@ -28,15 +28,15 @@ func TestMakeGuessCommand_Execute(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mgc := MakeGuessCommand{
-				GuessRepository: tt.fields.GuessRepository,
+				guessRepository: tt.fields.GuessRepository,
 			}
 			got, err := mgc.Execute(tt.args.ctx, tt.args.input)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Execute() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("AddWord() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Execute() got = %v, want %v", got, tt.want)
+				t.Errorf("AddWord() got = %v, want %v", got, tt.want)
 			}
 		})
 	}

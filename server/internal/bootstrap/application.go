@@ -37,8 +37,8 @@ func InitApplication(ctx context.Context, cfg config.Config) *Application {
 	pgQuery := initPostgresQuery(pgPoolConn)
 	pgDb := newPostgresDb(pgQuery)
 
-	useCase := initUseCases(pgDb, newRedisCache(), newValidator())
-	as := initService(useCase)
+	useCase := initUseCases(pgDb, newRedisCache())
+	as := initService(useCase, initChecker(useCase))
 
 	return &Application{
 		appService: as,
@@ -107,7 +107,7 @@ func (a *Application) setMiddlewares() {
 }
 
 func (a *Application) setGameRoutes(gameRoute fiber.Router, v validator3.InputValidator) {
-	gameHandler := game.NewHandler(game.NewService(a.appService.gameService), v)
+	gameHandler := game.NewHandler(game.NewService(a.appService.gameService, a.appService.wordChecker), v)
 
 	gameRoute.Get("/game", gameHandler.GetGame())
 	gameRoute.Post("/guess", gameHandler.MakeGuess())

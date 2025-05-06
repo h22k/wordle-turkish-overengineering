@@ -4,35 +4,39 @@ import (
 	application "github.com/h22k/wordle-turkish-overengineering/server/internal/application/game"
 	"github.com/h22k/wordle-turkish-overengineering/server/internal/application/game/command"
 	"github.com/h22k/wordle-turkish-overengineering/server/internal/application/game/query"
+	domain "github.com/h22k/wordle-turkish-overengineering/server/internal/domain/game"
 )
 
 type ucase interface {
-	AddWordCommand() *command.AddWordCommand
+	AddWordCommand() *command.WordCommand
 	NewGameCommand() *command.NewGameCommand
 	MakeGuessCommand() *command.MakeGuessCommand
 
 	GameQuery() *query.GameQuery
-	RandomVocableQuery() *query.RandomVocableQuery
+	VocableQuery() *query.VocableQuery
 	GuessQuery() *query.GuessQuery
 }
 
 type appService struct {
-	gameService application.GameService
+	gameService *application.GameService
+
+	wordChecker *domain.WordCheckerChain
 }
 
-func initService(uc ucase) *appService {
+func initService(uc ucase, wordCheckerChain *domain.WordCheckerChain) *appService {
 	return &appService{
 		gameService: application.NewGameService(
 			uc.MakeGuessCommand(),
 			uc.NewGameCommand(),
 			uc.AddWordCommand(),
 			uc.GameQuery(),
-			uc.RandomVocableQuery(),
+			uc.VocableQuery(),
 			uc.GuessQuery(),
 		),
+		wordChecker: wordCheckerChain,
 	}
 }
 
-func (as appService) GameService() application.GameService {
+func (as appService) GameService() *application.GameService {
 	return as.gameService
 }

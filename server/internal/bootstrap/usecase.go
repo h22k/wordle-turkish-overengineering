@@ -16,29 +16,25 @@ type cache interface {
 	gameCacheRepository() domain.GameCacheRepository
 }
 
-type wordValidator interface {
-	validator() domain.WordValidator
-}
-
 type usecase struct {
-	addWordCommand   *command.AddWordCommand
+	addWordCommand   *command.WordCommand
 	newGameCommand   *command.NewGameCommand
 	makeGuessCommand *command.MakeGuessCommand
 
-	gameQuery          *query.GameQuery
-	randomVocableQuery *query.RandomVocableQuery
-	guessQuery         *query.GuessQuery
+	gameQuery    *query.GameQuery
+	vocableQuery *query.VocableQuery
+	guessQuery   *query.GuessQuery
 }
 
-func initUseCases(db db, cache cache, wv wordValidator) *usecase {
+func initUseCases(db db, cache cache) *usecase {
 	return &usecase{
-		addWordCommand:   command.NewAddWordCommand(db.vocableRepository()),
-		newGameCommand:   command.NewNewGameCommand(db.gameRepository(), cache.gameCacheRepository(), wv.validator()),
+		addWordCommand:   command.NewWordCommand(db.vocableRepository()),
+		newGameCommand:   command.NewNewGameCommand(db.gameRepository(), cache.gameCacheRepository()),
 		makeGuessCommand: command.NewMakeGuessCommand(db.guessRepository()),
 
-		gameQuery:          query.NewGameQuery(db.gameRepository(), cache.gameCacheRepository()),
-		randomVocableQuery: query.NewRandomVocableQuery(db.vocableRepository()),
-		guessQuery:         query.NewGuessQuery(db.guessRepository()),
+		gameQuery:    query.NewGameQuery(db.gameRepository(), cache.gameCacheRepository()),
+		vocableQuery: query.NewVocableQuery(db.vocableRepository()),
+		guessQuery:   query.NewGuessQuery(db.guessRepository()),
 	}
 }
 
@@ -46,7 +42,7 @@ func (u usecase) GuessQuery() *query.GuessQuery {
 	return u.guessQuery
 }
 
-func (u usecase) AddWordCommand() *command.AddWordCommand {
+func (u usecase) AddWordCommand() *command.WordCommand {
 	return u.addWordCommand
 }
 
@@ -62,6 +58,6 @@ func (u usecase) GameQuery() *query.GameQuery {
 	return u.gameQuery
 }
 
-func (u usecase) RandomVocableQuery() *query.RandomVocableQuery {
-	return u.randomVocableQuery
+func (u usecase) VocableQuery() *query.VocableQuery {
+	return u.vocableQuery
 }

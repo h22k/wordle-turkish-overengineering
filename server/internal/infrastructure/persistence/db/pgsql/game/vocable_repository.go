@@ -43,6 +43,13 @@ func (v VocableRepository) Save(ctx context.Context, vocable domain.Vocable) err
 }
 
 func (v VocableRepository) FindByWord(ctx context.Context, word domain.Word) (domain.Vocable, error) {
-	//TODO implement me
-	panic("implement me")
+	wp, err := v.query.FindWord(ctx, word.String())
+
+	if err != nil {
+		return domain.Vocable{}, err
+	}
+
+	return domain.Vocable{
+		Word: domain.Word(wp.Word),
+	}, nil
 }

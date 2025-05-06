@@ -7,12 +7,12 @@ import (
 )
 
 type MakeGuessCommand struct {
-	GuessRepository domain.GuessRepository
+	guessRepository domain.GuessRepository
 }
 
 func NewMakeGuessCommand(guessRepo domain.GuessRepository) *MakeGuessCommand {
 	return &MakeGuessCommand{
-		GuessRepository: guessRepo,
+		guessRepository: guessRepo,
 	}
 }
 
@@ -24,7 +24,7 @@ func (mgc MakeGuessCommand) Execute(ctx context.Context, input MakeGuessInput) (
 		return MakeGuessResult{}, err
 	}
 
-	err = mgc.GuessRepository.Save(ctx, guess, input.Game, input.SessionId)
+	err = mgc.guessRepository.Save(ctx, guess, input.Game, input.SessionId)
 
 	if err != nil {
 		return MakeGuessResult{}, err
