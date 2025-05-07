@@ -4,6 +4,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+func StreamResponse(c *fiber.Ctx, data interface{}) {
+
+}
+
 func Success(c *fiber.Ctx, data interface{}) error {
 	return success(c, fiber.StatusOK, data)
 }
