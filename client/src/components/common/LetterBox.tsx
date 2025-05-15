@@ -42,6 +42,7 @@ function LetterBox({ letter, status, isFirstBox, index }: LetterBoxProps) {
       maxLength={ 1 }
       value={ letter }
       onKeyDown={ handleKeyDown }
+      onMouseDown={ (e: React.MouseEvent<HTMLInputElement>) => e.preventDefault() }
       onFocus={ handleFocus }
       className={ `
         w-[52px] h-[52px] text-center uppercase font-bold text-[2rem] text-white
