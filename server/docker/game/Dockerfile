@@ -25,7 +25,7 @@ COPY --from=builder /app/.env ./.env
 RUN ln -sf /dev/stdout /var/log/cron.log
 
 # Add crontab
-RUN echo "* * * * * /app/game 2>&1" > /etc/crontabs/root
+COPY ./docker/game/crontab /etc/crontabs/root
 
 # Use busybox crond which is already included in alpine
 USER root

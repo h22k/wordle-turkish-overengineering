@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: go-server
     environment:
-      - ENV_FILE=./.env
+      - ENV_FILE=/app/.env
     labels:
       - dev.orbstack.domains=wordle-backend.local
     develop:
@@ -81,6 +81,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./server/.env:/app/.env
+      - ./server/docker/game/crontab:/etc/crontabs/root
     env_file:
       - ./server/.env
     depends_on:
