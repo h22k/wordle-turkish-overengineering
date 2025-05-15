@@ -1,6 +1,7 @@
 import React, { createContext, useState } from 'react'
 import { MAX_ATTEMPTS, VALID_LETTERS_REGEX, WORD_LENGTH } from '../gameConfig'
 import { KeyboardContextType, LetterProps, LetterStatus } from '../types/game'
+import { useToast } from './toastContext'
 
 export const KeyboardContext = createContext<KeyboardContextType | undefined>(undefined)
 
@@ -12,10 +13,20 @@ export const KeyboardProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
   )
   const [ currentRow, setCurrentRow ] = useState(0)
   const [ activeBoxIndex, setActiveBoxIndex ] = useState(0)
+  const [ shakeRowIndex, setShakeRowIndex ] = useState<number | null>(null)
+
+  const { notify } = useToast()
+
+  const triggerShake = (row: number) => {
+    setShakeRowIndex(row)
+    setTimeout(() => setShakeRowIndex(null), 500)
+  }
 
   const moveToNextRow = () => {
     if ( currentRow < MAX_ATTEMPTS - 1 ) {
       setCurrentRow(currentRow + 1)
+      setActiveBoxIndex(0)
+      focusInput(currentRow + 1, 0)
     }
   }
 
@@ -70,12 +81,8 @@ export const KeyboardProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
       moveToNextRow()
     }
     else {
-      const rowElement = document.getElementById(`row-${ currentRow }`)
-      rowElement?.classList.add('animate-shake')
-
-      setTimeout(() => {
-        rowElement?.classList.remove('animate-shake')
-      }, 500)
+      notify('Harf sayısı yetersiz')
+      triggerShake(currentRow)
     }
   }
 
@@ -96,7 +103,16 @@ export const KeyboardProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
 
   return (
     <KeyboardContext.Provider
-      value={ { letters, handleChange, currentRow, moveToNextRow, activeBoxIndex, setActiveBoxIndex } }>
+      value={ {
+        letters,
+        handleChange,
+        currentRow,
+        moveToNextRow,
+        activeBoxIndex,
+        setActiveBoxIndex,
+        shakeRowIndex,
+        triggerShake,
+      } }>
       { children }
     </KeyboardContext.Provider>
   )

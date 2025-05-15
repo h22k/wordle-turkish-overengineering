@@ -17,11 +17,12 @@ export interface KeyboardContextType {
   moveToNextRow: () => void
   activeBoxIndex: number
   setActiveBoxIndex: (index: number) => void
+  shakeRowIndex: number | null
+  triggerShake: (row: number) => void
 }
 
 export interface LetterRowProps {
   rowIndex: number
-  isFirstRow: boolean
   currentRow: number
 }
 
@@ -36,4 +37,5 @@ export interface LetterBoxProps {
   onChange?: (value: string) => void
   isFirstBox: boolean
   index?: number
+  rowIndex?: number
 }

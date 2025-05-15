@@ -11,7 +11,6 @@ function Board() {
         <LetterRow
           key={ i }
           rowIndex={ i }
-          isFirstRow={ i === 0 }
           currentRow={ currentRow }
         />
       )) }
