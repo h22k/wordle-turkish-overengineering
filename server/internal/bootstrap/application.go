@@ -4,47 +4,51 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/adaptor"
-	"github.com/gofiber/fiber/v2/middleware/encryptcookie"
-	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/grafana/pyroscope-go"
 	"github.com/h22k/wordle-turkish-overengineering/server/config"
+	"github.com/h22k/wordle-turkish-overengineering/server/internal/application/event"
 	validator3 "github.com/h22k/wordle-turkish-overengineering/server/internal/application/validator"
+	metrics "github.com/h22k/wordle-turkish-overengineering/server/internal/infrastructure/metric"
+	"github.com/h22k/wordle-turkish-overengineering/server/internal/infrastructure/persistence/db/pgsql"
 	validator2 "github.com/h22k/wordle-turkish-overengineering/server/internal/infrastructure/validator"
-	metrics "github.com/h22k/wordle-turkish-overengineering/server/internal/metric"
-	"github.com/h22k/wordle-turkish-overengineering/server/internal/presentation/http/fiber/game"
-	"github.com/h22k/wordle-turkish-overengineering/server/internal/presentation/http/fiber/middleware"
+	"github.com/h22k/wordle-turkish-overengineering/server/internal/presentation/http/echo/game"
+	"github.com/h22k/wordle-turkish-overengineering/server/internal/presentation/http/echo/middleware"
+	game2 "github.com/h22k/wordle-turkish-overengineering/server/internal/presentation/http/game"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/labstack/echo/v4"
+	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type Application struct {
-	fiberApp *fiber.App
-
-	db *pgxpool.Pool
-
+	ctx        context.Context
+	echoApp    *echo.Echo
+	db         *pgxpool.Pool
+	dbListener *pgsql.EventListener
 	appService *appService
-
-	cfg config.Config
-
-	profiler *pyroscope.Profiler
+	cfg        config.Config
+	profiler   *pyroscope.Profiler
 }
 
 func InitApplication(ctx context.Context, cfg config.Config) *Application {
-	pgPoolConn := must(initPostgresql(ctx, cfg))
+	pgPoolConn := must(initPostgresqlPoolConn(ctx, cfg))
 	pgQuery := initPostgresQuery(pgPoolConn)
 	pgDb := newPostgresDb(pgQuery)
+	pgListener := pgsql.NewEventListener(must(initPostgresqlConn(ctx, cfg)))
 
 	useCase := initUseCases(pgDb, newRedisCache())
 	as := initService(useCase, initChecker(useCase))
 
+	e := echo.New()
+	e.Validator = validator2.NewValidator()
+
 	return &Application{
 		appService: as,
 		cfg:        cfg,
-		fiberApp:   fiber.New(fiber.Config{AppName: cfg.AppName}),
+		echoApp:    e,
 		db:         pgPoolConn,
+		dbListener: pgListener,
+		ctx:        ctx,
 	}
 }
 
@@ -58,8 +62,8 @@ func (a *Application) SetRoutes() {
 	a.setMiddlewares()
 	a.setMetric()
 
-	v1 := a.fiberApp.Group("/api/v1")
-	v1.Use(logger.New())
+	v1 := a.echoApp.Group("/api/v1")
+	v1.Use(echoMiddleware.Logger())
 
 	gameRoute := v1.Group("/game")
 
@@ -69,11 +73,13 @@ func (a *Application) SetRoutes() {
 }
 
 func (a *Application) Run() error {
-	return a.fiberApp.Listen(a.cfg.ServerPort)
+	return a.echoApp.Start(a.cfg.ServerPort)
 }
 
 func (a *Application) Close() {
-	a.fiberApp.Shutdown()
+	if err := a.echoApp.Shutdown(a.ctx); err != nil {
+		a.echoApp.Logger.Fatal(err)
+	}
 	a.db.Close()
 
 	if a.profiler != nil {
@@ -84,43 +90,34 @@ func (a *Application) Close() {
 func (a *Application) setMetric() {
 	metrics.Init()
 
-	a.fiberApp.Get("/metrics", adaptor.HTTPHandler(promhttp.Handler()))
+	a.echoApp.GET("/metrics", echo.WrapHandler(promhttp.Handler()))
 }
 
 func (a *Application) setMiddlewares() {
-	a.fiberApp.Hooks().OnRoute(func(route fiber.Route) error {
-		fmt.Println(route.Path)
-		return nil
-	})
-
-	a.fiberApp.Use(middleware.MetricsMiddleware())
-
-	a.fiberApp.Use(middleware.ServerTimingMiddleware())
-
-	a.fiberApp.Use(encryptcookie.New(encryptcookie.Config{
-		Key: a.cfg.AppKey,
-	}))
-
-	a.fiberApp.Use(middleware.IdentifierCookieMiddleware())
-
-	a.fiberApp.Use(requestid.New())
+	a.echoApp.Use(middleware.MetricsMiddleware())
+	a.echoApp.Use(middleware.ServerTimingMiddleware())
+	a.echoApp.Use(middleware.IdentifierCookieMiddleware())
+	a.echoApp.Use(echoMiddleware.RequestID())
 }
 
-func (a *Application) setGameRoutes(gameRoute fiber.Router, v validator3.InputValidator) {
-	gameHandler := game.NewHandler(game.NewService(a.appService.gameService, a.appService.wordChecker), v)
+func (a *Application) setGameRoutes(gameRoute *echo.Group, v validator3.InputValidator) {
+	gameHandler := game.NewHandler(game2.NewService(a.appService.gameService, a.appService.wordChecker), v)
 
-	gameRoute.Get("/game", gameHandler.GetGame())
-	gameRoute.Post("/guess", gameHandler.MakeGuess())
+	gameBroker := event.NewBroker()
+	gameDispatcher := event.NewDispatcher(a.dbListener, gameBroker)
+
+	go gameDispatcher.Start(a.ctx, "game_created")
+
+	gameRoute.GET("/game", gameHandler.GetGame())
+	gameRoute.POST("/guess", middleware.ValidateRequest(gameHandler.MakeGuess))
+	gameRoute.GET("/events", gameHandler.Sse(gameBroker))
 }
 
 func (a *Application) setProfiler() {
 	profiler, err := pyroscope.Start(pyroscope.Config{
 		ApplicationName: a.cfg.AppName,
-
-		ServerAddress: a.cfg.PyroscopeUrl,
-
-		Logger: pyroscope.StandardLogger,
-
+		ServerAddress:   a.cfg.PyroscopeUrl,
+		Logger:          pyroscope.StandardLogger,
 		ProfileTypes: []pyroscope.ProfileType{
 			pyroscope.ProfileCPU,
 			pyroscope.ProfileAllocObjects,

@@ -22,8 +22,6 @@ func NewWordCheckerChain(checkers ...WordChecker) *WordCheckerChain {
 }
 
 func (w WordCheckerChain) Check(ctx context.Context, word Word) error {
-	result := false
-
 	for _, checker := range w.checkers {
 		res, err := checker.Check(ctx, word)
 
@@ -31,16 +29,10 @@ func (w WordCheckerChain) Check(ctx context.Context, word Word) error {
 			return err
 		}
 
-		result = res
-
 		if res {
-			break
+			return nil
 		}
 	}
 
-	if !result {
-		return WordNotAcceptableErr
-	}
-
-	return nil
+	return WordNotAcceptableErr
 }

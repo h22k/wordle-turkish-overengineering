@@ -8,8 +8,9 @@ import (
 )
 
 type GameRepository interface {
-	Save(ctx context.Context, game Game) error
+	Save(ctx context.Context, game Game, wordId int32) error
 	GetLastGame(ctx context.Context) (Game, error)
+	MakeGameInactive(ctx context.Context, gameId uuid.UUID) error
 }
 
 type GameCacheRepository interface {
@@ -23,8 +24,9 @@ type GuessRepository interface {
 }
 
 type VocableRepository interface {
-	FindRandom(ctx context.Context) (Word, error)
+	FindRandom(ctx context.Context) (Word, int32, error)
 	Update(ctx context.Context, vocable Vocable) error
 	Save(ctx context.Context, vocable Vocable) error
 	FindByWord(ctx context.Context, word Word) (Vocable, error)
+	IsWordExists(ctx context.Context, word Word) (bool, error)
 }

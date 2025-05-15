@@ -8,3 +8,8 @@ type LetterView struct {
 	Char   string `json:"char"`
 	Status string `json:"status"`
 }
+
+type SSEEvent struct {
+	EventName string `json:"event_name"`
+	Payload   string `json:"payload"`
+}

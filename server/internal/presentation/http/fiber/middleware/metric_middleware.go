@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
-	metrics "github.com/h22k/wordle-turkish-overengineering/server/internal/metric"
+	"github.com/h22k/wordle-turkish-overengineering/server/internal/infrastructure/metric"
 )
 
 func MetricsMiddleware() fiber.Handler {

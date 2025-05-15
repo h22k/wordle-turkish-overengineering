@@ -17,14 +17,18 @@ func NewVocableRepository(q *query.Queries) *VocableRepository {
 	}
 }
 
-func (v VocableRepository) FindRandom(ctx context.Context) (domain.Word, error) {
-	stringWord, err := v.query.GetRandomSecretWord(ctx)
+func (v VocableRepository) IsWordExists(ctx context.Context, word domain.Word) (bool, error) {
+	return v.query.IsWordExists(ctx, word.String())
+}
+
+func (v VocableRepository) FindRandom(ctx context.Context) (domain.Word, int32, error) {
+	wordPool, err := v.query.GetRandomWord(ctx)
 
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
 
-	return domain.Word(stringWord), nil
+	return domain.Word(wordPool.Word), wordPool.ID, nil
 }
 
 func (v VocableRepository) Update(ctx context.Context, vocable domain.Vocable) error {
@@ -33,11 +37,7 @@ func (v VocableRepository) Update(ctx context.Context, vocable domain.Vocable) e
 }
 
 func (v VocableRepository) Save(ctx context.Context, vocable domain.Vocable) error {
-	_, err := v.query.AddWordToPool(ctx, query.AddWordToPoolParams{
-		Word:     vocable.Word.String(),
-		IsValid:  true,
-		IsAnswer: false,
-	})
+	_, err := v.query.AddWordToPool(ctx, vocable.Word.String())
 
 	return err
 }
