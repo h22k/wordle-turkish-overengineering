@@ -11,7 +11,7 @@ import (
 
 type Game struct {
 	ID          uuid.UUID
-	SecretWord  string
+	WordID      int32
 	WordLength  int32
 	MaxAttempts int32
 	IsActive    bool
@@ -29,8 +29,6 @@ type Guess struct {
 }
 
 type WordPool struct {
-	ID       int32
-	Word     string
-	IsAnswer bool
-	IsValid  bool
+	ID   int32
+	Word string
 }

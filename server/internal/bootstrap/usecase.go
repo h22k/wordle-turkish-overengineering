@@ -20,6 +20,7 @@ type usecase struct {
 	addWordCommand   *command.WordCommand
 	newGameCommand   *command.NewGameCommand
 	makeGuessCommand *command.MakeGuessCommand
+	makeGameInactive *command.MakeGameInactiveCommand
 
 	gameQuery    *query.GameQuery
 	vocableQuery *query.VocableQuery
@@ -31,6 +32,7 @@ func initUseCases(db db, cache cache) *usecase {
 		addWordCommand:   command.NewWordCommand(db.vocableRepository()),
 		newGameCommand:   command.NewNewGameCommand(db.gameRepository(), cache.gameCacheRepository()),
 		makeGuessCommand: command.NewMakeGuessCommand(db.guessRepository()),
+		makeGameInactive: command.NewMakeGameInactiveCommand(db.gameRepository()),
 
 		gameQuery:    query.NewGameQuery(db.gameRepository(), cache.gameCacheRepository()),
 		vocableQuery: query.NewVocableQuery(db.vocableRepository()),
@@ -60,4 +62,8 @@ func (u usecase) GameQuery() *query.GameQuery {
 
 func (u usecase) VocableQuery() *query.VocableQuery {
 	return u.vocableQuery
+}
+
+func (u usecase) MakeGameInactiveCommand() *command.MakeGameInactiveCommand {
+	return u.makeGameInactive
 }

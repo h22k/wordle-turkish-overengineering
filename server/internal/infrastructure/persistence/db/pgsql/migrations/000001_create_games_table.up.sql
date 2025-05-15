@@ -1,7 +1,13 @@
+CREATE TABLE word_pool
+(
+    id   SERIAL PRIMARY KEY,
+    word VARCHAR(7) NOT NULL UNIQUE
+);
+
 CREATE TABLE games
 (
     id           UUID PRIMARY KEY                  DEFAULT gen_random_uuid(),
-    secret_word  VARCHAR(7)               NOT NULL,
+    word_id      INT                      NOT NULL REFERENCES word_pool (id),
     word_length  INT                      NOT NULL,
     max_attempts INT                      NOT NULL,
     is_active    BOOLEAN                  NOT NULL DEFAULT TRUE,
@@ -12,7 +18,7 @@ CREATE TABLE games
 
 CREATE TABLE guesses
 (
-    id             SERIAL PRIMARY KEY,
+    id             UUID PRIMARY KEY                  DEFAULT gen_random_uuid(),
     game_id        UUID                     NOT NULL REFERENCES games (id) ON DELETE CASCADE,
     word           VARCHAR(7)               NOT NULL,
     attempt_number INT                      NOT NULL,
@@ -22,11 +28,10 @@ CREATE TABLE guesses
     UNIQUE (game_id, session_id, word)
 );
 
+CREATE INDEX idx_guesses_game_session ON guesses(game_id, session_id);
 
-CREATE TABLE word_pool
-(
-    id        SERIAL PRIMARY KEY,
-    word      VARCHAR(7) NOT NULL UNIQUE,
-    is_answer BOOLEAN    NOT NULL DEFAULT FALSE,
-    is_valid  BOOLEAN    NOT NULL DEFAULT TRUE
-);
+CREATE INDEX idx_word_pool_word ON word_pool(word);
+
+CREATE INDEX idx_games_word_id ON games(word_id);
+
+CREATE INDEX idx_games_is_active ON games(is_active) WHERE is_active = true;

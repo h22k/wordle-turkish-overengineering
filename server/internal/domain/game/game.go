@@ -103,3 +103,7 @@ func (g *Game) GuessedCorrectly() bool {
 func (g *Game) GuessExceeded() bool {
 	return len(g.WordGuesses) >= int(g.MaxWordGuesses)
 }
+
+func (g *Game) IsFinished() bool {
+	return g.GuessedCorrectly() || g.GuessExceeded()
+}

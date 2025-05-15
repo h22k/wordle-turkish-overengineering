@@ -9,50 +9,40 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const addWordToPool = `-- name: AddWordToPool :one
-INSERT INTO word_pool (word, is_answer, is_valid)
-VALUES ($1, $2, $3)
-RETURNING id, word, is_answer, is_valid
+INSERT INTO word_pool (word)
+VALUES ($1)
+RETURNING id, word
 `
 
-type AddWordToPoolParams struct {
-	Word     string
-	IsAnswer bool
-	IsValid  bool
-}
-
-func (q *Queries) AddWordToPool(ctx context.Context, arg AddWordToPoolParams) (WordPool, error) {
-	row := q.db.QueryRow(ctx, addWordToPool, arg.Word, arg.IsAnswer, arg.IsValid)
+func (q *Queries) AddWordToPool(ctx context.Context, word string) (WordPool, error) {
+	row := q.db.QueryRow(ctx, addWordToPool, word)
 	var i WordPool
-	err := row.Scan(
-		&i.ID,
-		&i.Word,
-		&i.IsAnswer,
-		&i.IsValid,
-	)
+	err := row.Scan(&i.ID, &i.Word)
 	return i, err
 }
 
 const createGame = `-- name: CreateGame :one
-INSERT INTO games (secret_word, max_attempts, word_length)
+INSERT INTO games (word_id, max_attempts, word_length)
 VALUES ($1, $2, $3)
-RETURNING id, secret_word, word_length, max_attempts, is_active, created_at, updated_at
+RETURNING id, word_id, word_length, max_attempts, is_active, created_at, updated_at
 `
 
 type CreateGameParams struct {
-	SecretWord  string
+	WordID      int32
 	MaxAttempts int32
 	WordLength  int32
 }
 
 func (q *Queries) CreateGame(ctx context.Context, arg CreateGameParams) (Game, error) {
-	row := q.db.QueryRow(ctx, createGame, arg.SecretWord, arg.MaxAttempts, arg.WordLength)
+	row := q.db.QueryRow(ctx, createGame, arg.WordID, arg.MaxAttempts, arg.WordLength)
 	var i Game
 	err := row.Scan(
 		&i.ID,
-		&i.SecretWord,
+		&i.WordID,
 		&i.WordLength,
 		&i.MaxAttempts,
 		&i.IsActive,
@@ -95,102 +85,95 @@ func (q *Queries) CreateGuess(ctx context.Context, arg CreateGuessParams) (Guess
 }
 
 const findGameById = `-- name: FindGameById :one
-SELECT id, secret_word, word_length, max_attempts, is_active, created_at, updated_at
-FROM games
-WHERE id = $1
+SELECT g.id, g.word_id, g.word_length, g.max_attempts, g.is_active, g.created_at, g.updated_at, w.word as secret_word
+FROM games g
+JOIN word_pool w ON w.id = g.word_id
+WHERE g.id = $1
 `
 
-func (q *Queries) FindGameById(ctx context.Context, id uuid.UUID) (Game, error) {
+type FindGameByIdRow struct {
+	ID          uuid.UUID
+	WordID      int32
+	WordLength  int32
+	MaxAttempts int32
+	IsActive    bool
+	CreatedAt   pgtype.Timestamptz
+	UpdatedAt   pgtype.Timestamptz
+	SecretWord  string
+}
+
+func (q *Queries) FindGameById(ctx context.Context, id uuid.UUID) (FindGameByIdRow, error) {
 	row := q.db.QueryRow(ctx, findGameById, id)
-	var i Game
+	var i FindGameByIdRow
 	err := row.Scan(
 		&i.ID,
-		&i.SecretWord,
+		&i.WordID,
 		&i.WordLength,
 		&i.MaxAttempts,
 		&i.IsActive,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SecretWord,
 	)
 	return i, err
 }
 
 const findWord = `-- name: FindWord :one
-SELECT id, word, is_answer, is_valid
+SELECT id, word
 FROM word_pool
-WHERE is_valid = true
-  AND word = $1
+WHERE word = $1
 `
 
 func (q *Queries) FindWord(ctx context.Context, word string) (WordPool, error) {
 	row := q.db.QueryRow(ctx, findWord, word)
 	var i WordPool
-	err := row.Scan(
-		&i.ID,
-		&i.Word,
-		&i.IsAnswer,
-		&i.IsValid,
-	)
+	err := row.Scan(&i.ID, &i.Word)
 	return i, err
 }
 
 const getActiveGame = `-- name: GetActiveGame :one
-SELECT id, secret_word, word_length, max_attempts, is_active, created_at, updated_at
-FROM games
-WHERE is_active = true
-ORDER BY created_at DESC
+SELECT g.id, g.word_id, g.word_length, g.max_attempts, g.is_active, g.created_at, g.updated_at, w.word as secret_word
+FROM games g
+JOIN word_pool w ON w.id = g.word_id
+WHERE g.is_active = true
+ORDER BY g.created_at DESC
 LIMIT 1
 `
 
-func (q *Queries) GetActiveGame(ctx context.Context) (Game, error) {
+type GetActiveGameRow struct {
+	ID          uuid.UUID
+	WordID      int32
+	WordLength  int32
+	MaxAttempts int32
+	IsActive    bool
+	CreatedAt   pgtype.Timestamptz
+	UpdatedAt   pgtype.Timestamptz
+	SecretWord  string
+}
+
+func (q *Queries) GetActiveGame(ctx context.Context) (GetActiveGameRow, error) {
 	row := q.db.QueryRow(ctx, getActiveGame)
-	var i Game
+	var i GetActiveGameRow
 	err := row.Scan(
 		&i.ID,
-		&i.SecretWord,
+		&i.WordID,
 		&i.WordLength,
 		&i.MaxAttempts,
 		&i.IsActive,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SecretWord,
 	)
 	return i, err
 }
 
-const getAllAnswerWords = `-- name: GetAllAnswerWords :many
+const getAllWords = `-- name: GetAllWords :many
 SELECT word
 FROM word_pool
-WHERE is_answer = true
 `
 
-func (q *Queries) GetAllAnswerWords(ctx context.Context) ([]string, error) {
-	rows, err := q.db.Query(ctx, getAllAnswerWords)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []string
-	for rows.Next() {
-		var word string
-		if err := rows.Scan(&word); err != nil {
-			return nil, err
-		}
-		items = append(items, word)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getAllValidWords = `-- name: GetAllValidWords :many
-SELECT word
-FROM word_pool
-WHERE is_valid = true
-`
-
-func (q *Queries) GetAllValidWords(ctx context.Context) ([]string, error) {
-	rows, err := q.db.Query(ctx, getAllValidWords)
+func (q *Queries) GetAllWords(ctx context.Context) ([]string, error) {
+	rows, err := q.db.Query(ctx, getAllWords)
 	if err != nil {
 		return nil, err
 	}
@@ -268,30 +251,41 @@ func (q *Queries) GetGameGuessesCount(ctx context.Context, arg GetGameGuessesCou
 	return count, err
 }
 
-const getRandomSecretWord = `-- name: GetRandomSecretWord :one
-SELECT word
+const getRandomWord = `-- name: GetRandomWord :one
+SELECT id, word
 FROM word_pool
-WHERE is_answer = true
-ORDER BY RANDOM()
+WHERE id >= (SELECT floor(random() * (SELECT MAX(id) FROM word_pool)))
 LIMIT 1
 `
 
-func (q *Queries) GetRandomSecretWord(ctx context.Context) (string, error) {
-	row := q.db.QueryRow(ctx, getRandomSecretWord)
-	var word string
-	err := row.Scan(&word)
-	return word, err
+func (q *Queries) GetRandomWord(ctx context.Context) (WordPool, error) {
+	row := q.db.QueryRow(ctx, getRandomWord)
+	var i WordPool
+	err := row.Scan(&i.ID, &i.Word)
+	return i, err
 }
 
 const isValidGuess = `-- name: IsValidGuess :one
 SELECT EXISTS(SELECT 1
-              FROM word_pool
-              WHERE word = $1
-                AND is_valid = true)
+             FROM word_pool
+             WHERE word = $1)
 `
 
 func (q *Queries) IsValidGuess(ctx context.Context, word string) (bool, error) {
 	row := q.db.QueryRow(ctx, isValidGuess, word)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const isWordExists = `-- name: IsWordExists :one
+SELECT EXISTS(SELECT 1
+             FROM word_pool
+             WHERE word = $1)
+`
+
+func (q *Queries) IsWordExists(ctx context.Context, word string) (bool, error) {
+	row := q.db.QueryRow(ctx, isWordExists, word)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
@@ -302,7 +296,7 @@ UPDATE games
 SET is_active  = false,
     updated_at = NOW()
 WHERE id = $1
-RETURNING id, secret_word, word_length, max_attempts, is_active, created_at, updated_at
+RETURNING id, word_id, word_length, max_attempts, is_active, created_at, updated_at
 `
 
 func (q *Queries) MakeGameInactive(ctx context.Context, id uuid.UUID) (Game, error) {
@@ -310,7 +304,7 @@ func (q *Queries) MakeGameInactive(ctx context.Context, id uuid.UUID) (Game, err
 	var i Game
 	err := row.Scan(
 		&i.ID,
-		&i.SecretWord,
+		&i.WordID,
 		&i.WordLength,
 		&i.MaxAttempts,
 		&i.IsActive,

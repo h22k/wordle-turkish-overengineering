@@ -4,6 +4,10 @@ services:
       context: server
       dockerfile: Dockerfile
     container_name: go-server
+    environment:
+      - ENV_FILE=./.env
+    labels:
+      - dev.orbstack.domains=wordle-backend.local
     develop:
       watch:
         - action: rebuild
@@ -50,6 +54,10 @@ services:
       context: client
       dockerfile: Dockerfile
     container_name: react-client
+    environment:
+      - VITE_API_BASE_URL_URL=${API_BASE_URL}
+    labels:
+      - dev.orbstack.domains=wordle.local
     develop:
       watch:
         - action: rebuild
@@ -61,6 +69,22 @@ services:
       - /app/node_modules
     ports:
       - "5173:5173"
+    networks:
+      - wordle-network
+  game-rotator:
+    build:
+      context: server
+      dockerfile: docker/game/Dockerfile
+    container_name: game-rotator
+    environment:
+      - ENV_FILE=/app/.env
+    restart: unless-stopped
+    volumes:
+      - ./server/.env:/app/.env
+    env_file:
+      - ./server/.env
+    depends_on:
+      - database
     networks:
       - wordle-network
   pyroscope:

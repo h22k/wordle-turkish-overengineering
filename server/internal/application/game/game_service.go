@@ -12,6 +12,7 @@ type GameService struct {
 	makeGuessCommand *command.MakeGuessCommand
 	newGameCommand   *command.NewGameCommand
 	addWordCommand   *command.WordCommand
+	makeGameInactive *command.MakeGameInactiveCommand
 
 	gameQuery          *query.GameQuery
 	randomVocableQuery *query.VocableQuery
@@ -22,6 +23,7 @@ func NewGameService(
 	makeGuessCommand *command.MakeGuessCommand,
 	newGameCommand *command.NewGameCommand,
 	addWordCommand *command.WordCommand,
+	makeGameInactive *command.MakeGameInactiveCommand,
 	gameQuery *query.GameQuery,
 	randomVocableQuery *query.VocableQuery,
 	guessQuery *query.GuessQuery,
@@ -30,6 +32,7 @@ func NewGameService(
 		makeGuessCommand:   makeGuessCommand,
 		newGameCommand:     newGameCommand,
 		addWordCommand:     addWordCommand,
+		makeGameInactive:   makeGameInactive,
 		gameQuery:          gameQuery,
 		randomVocableQuery: randomVocableQuery,
 		guessQuery:         guessQuery,
@@ -61,15 +64,15 @@ func (gs GameService) GetGameGuesses(ctx context.Context, game domain.Game, sess
 }
 
 func (gs GameService) CreateGame(ctx context.Context) (command.CreateGameResult, error) {
-	word, err := gs.randomVocableQuery.GetDailyWord(ctx)
+	word, wordId, err := gs.randomVocableQuery.GetDailyWord(ctx)
 
 	if err != nil {
 		return command.CreateGameResult{}, err
 	}
 
-	gameResult, err := gs.newGameCommand.Execute(ctx, word)
+	gameResult, err := gs.newGameCommand.Execute(ctx, word, wordId)
 
-	if err != nil {
+	if err != nil && gameResult.WordLength == 0 {
 		return command.CreateGameResult{}, err
 	}
 
@@ -78,6 +81,10 @@ func (gs GameService) CreateGame(ctx context.Context) (command.CreateGameResult,
 
 func (gs GameService) AddWord(ctx context.Context, word domain.Word) error {
 	return gs.addWordCommand.AddWord(ctx, word)
+}
+
+func (gs GameService) MakeGameInactive(ctx context.Context, game domain.Game) error {
+	return gs.makeGameInactive.Execute(ctx, game)
 }
 
 func (gs GameService) LastGame(ctx context.Context) (domain.Game, error) {

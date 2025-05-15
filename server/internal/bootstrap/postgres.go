@@ -8,6 +8,7 @@ import (
 	domain "github.com/h22k/wordle-turkish-overengineering/server/internal/domain/game"
 	"github.com/h22k/wordle-turkish-overengineering/server/internal/infrastructure/persistence/db/pgsql/game"
 	"github.com/h22k/wordle-turkish-overengineering/server/internal/infrastructure/persistence/db/pgsql/game/query"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -37,7 +38,21 @@ func newPostgresDb(q *query.Queries) *postgresDb {
 	}
 }
 
-func initPostgresql(ctx context.Context, cfg config.Config) (*pgxpool.Pool, error) {
+func initPostgresqlConn(ctx context.Context, cfg config.Config) (*pgx.Conn, error) {
+	pgConn, err := pgx.Connect(ctx, cfg.DbUrl)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err = pgConn.Ping(ctx); err != nil {
+		return nil, err
+	}
+
+	return pgConn, nil
+}
+
+func initPostgresqlPoolConn(ctx context.Context, cfg config.Config) (*pgxpool.Pool, error) {
 	pgConn, err := pgxpool.ParseConfig(cfg.DbUrl)
 
 	if err != nil {
