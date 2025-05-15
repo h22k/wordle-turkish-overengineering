@@ -1,5 +1,5 @@
 import React, { createContext, useState } from 'react'
-import { MAX_ATTEMPTS, WORD_LENGTH } from '../gameConfig'
+import { MAX_ATTEMPTS, VALID_LETTERS_REGEX, WORD_LENGTH } from '../gameConfig'
 import { KeyboardContextType, LetterProps, LetterStatus } from '../types/game'
 
 export const KeyboardContext = createContext<KeyboardContextType | undefined>(undefined)
@@ -11,39 +11,7 @@ export const KeyboardProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
     ),
   )
   const [ currentRow, setCurrentRow ] = useState(0)
-
-  const handleChange = (value: string) => {
-    const updatedLetters = [ ...letters ]
-    const firstEmptyIndex = updatedLetters[currentRow].findIndex(letter => letter.char === '')
-
-    if ( value === 'BACKSPACE' ) {
-      if ( firstEmptyIndex === -1 ) {
-        updatedLetters[currentRow][WORD_LENGTH - 1].char = ''
-      }
-      else {
-        updatedLetters[currentRow][firstEmptyIndex - 1].char = ''
-      }
-      setLetters(updatedLetters)
-    }
-    else if ( value === 'ENTER' ) {
-      const filled = updatedLetters[currentRow].filter(letter => letter.char !== '')
-      if ( filled.length === WORD_LENGTH ) {
-        moveToNextRow()
-      }
-      else {
-        document.getElementById(`row-${ currentRow }`)?.classList.add('animate-shake')
-        setTimeout(() => {
-          document.getElementById(`row-${ currentRow }`)?.classList.remove('animate-shake')
-        }, 500)
-      }
-    }
-    else {
-      if ( firstEmptyIndex !== -1 ) {
-        updatedLetters[currentRow][firstEmptyIndex].char = value
-        setLetters(updatedLetters)
-      }
-    }
-  }
+  const [ activeBoxIndex, setActiveBoxIndex ] = useState(0)
 
   const moveToNextRow = () => {
     if ( currentRow < MAX_ATTEMPTS - 1 ) {
@@ -51,8 +19,84 @@ export const KeyboardProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
     }
   }
 
+  const focusInput = (row: number, index: number) => {
+    setTimeout(() => {
+      const input = document.getElementById(`input-${ row }-${ index }`) as HTMLInputElement | null
+      input?.focus()
+    }, 0)
+  }
+
+  const addLetter = (value: string) => {
+    if ( activeBoxIndex >= WORD_LENGTH ) return
+
+    const updatedLetters = [ ...letters ]
+    const currentBox = updatedLetters[currentRow][activeBoxIndex]
+
+    if ( currentBox.char !== '' ) return
+
+    currentBox.char = value
+    setLetters(updatedLetters)
+
+    const isLastBox = activeBoxIndex === WORD_LENGTH - 1
+    if ( !isLastBox ) {
+      setActiveBoxIndex(activeBoxIndex + 1)
+      focusInput(currentRow, activeBoxIndex + 1)
+    }
+  }
+
+  const deleteLetter = () => {
+    if ( activeBoxIndex <= 0 ) return
+
+    const updatedLetters = [ ...letters ]
+    const currentBox = updatedLetters[currentRow][activeBoxIndex]
+
+    if ( currentBox?.char ) {
+      currentBox.char = ''
+    }
+    else {
+      updatedLetters[currentRow][activeBoxIndex - 1].char = ''
+      setActiveBoxIndex(activeBoxIndex - 1)
+      focusInput(currentRow, activeBoxIndex - 1)
+    }
+
+    setLetters(updatedLetters)
+  }
+
+  const submitWord = () => {
+    const currentWord = letters[currentRow]
+    const filledLetters = currentWord.filter(letter => letter.char !== '')
+
+    if ( filledLetters.length === WORD_LENGTH ) {
+      moveToNextRow()
+    }
+    else {
+      const rowElement = document.getElementById(`row-${ currentRow }`)
+      rowElement?.classList.add('animate-shake')
+
+      setTimeout(() => {
+        rowElement?.classList.remove('animate-shake')
+      }, 500)
+    }
+  }
+
+  const handleChange = (value: string) => {
+    const upperValue = value.toUpperCase()
+
+    if ( upperValue === 'BACKSPACE' ) {
+      deleteLetter()
+    }
+    else if ( upperValue === 'ENTER' ) {
+      submitWord()
+    }
+    else if ( VALID_LETTERS_REGEX.test(upperValue) ) {
+      addLetter(upperValue)
+      setActiveBoxIndex(Math.min(activeBoxIndex + 1, WORD_LENGTH - 1))
+    }
+  }
+
   return (
-    <KeyboardContext.Provider value={ { letters, handleChange, currentRow, moveToNextRow } }>
+    <KeyboardContext.Provider
+      value={ { letters, handleChange, currentRow, moveToNextRow, activeBoxIndex, setActiveBoxIndex } }>
       { children }
     </KeyboardContext.Provider>
   )

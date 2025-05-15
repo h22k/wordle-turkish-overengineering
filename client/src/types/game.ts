@@ -15,6 +15,8 @@ export interface KeyboardContextType {
   handleChange: (value: string) => void
   currentRow: number
   moveToNextRow: () => void
+  activeBoxIndex: number
+  setActiveBoxIndex: (index: number) => void
 }
 
 export interface LetterRowProps {

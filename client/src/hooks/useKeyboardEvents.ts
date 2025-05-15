@@ -1,5 +1,6 @@
 import { useKeyboard } from './useKeyboard'
 import React from 'react'
+import { VALID_LETTERS_REGEX } from '../gameConfig'
 
 export const useKeyboardEvents = (inputRef?: React.RefObject<HTMLInputElement>) => {
   const { handleChange } = useKeyboard()
@@ -7,7 +8,7 @@ export const useKeyboardEvents = (inputRef?: React.RefObject<HTMLInputElement>) 
   const processKey = (key: string) => {
     const upperKey = key.toUpperCase()
 
-    if ( /^[A-Z]$/.test(upperKey) ) {
+    if ( VALID_LETTERS_REGEX.test(upperKey) ) {
       handleChange(upperKey)
       setTimeout(() => {
         ( inputRef?.current?.nextElementSibling as HTMLInputElement | null )?.focus()

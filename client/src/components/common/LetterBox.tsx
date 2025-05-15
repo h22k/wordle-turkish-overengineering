@@ -1,12 +1,14 @@
-import React, { useRef, useEffect, useState } from 'react'
-import { STATUS_COLOR } from '../../gameConfig'
+import React, { useEffect, useRef, useState } from 'react'
+import { STATUS_COLOR, VALID_LETTERS_REGEX } from '../../gameConfig'
 import { LetterBoxProps } from '../../types/game'
 import { useKeyboardEvents } from '../../hooks/useKeyboardEvents'
+import { useKeyboard } from '../../hooks/useKeyboard'
 
-function LetterBox({ letter, status, isFirstBox }: LetterBoxProps) {
+function LetterBox({ letter, status, isFirstBox, index }: LetterBoxProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [ isAnimating, setIsAnimating ] = useState(false)
   const { processKey } = useKeyboardEvents()
+  const { setActiveBoxIndex, currentRow } = useKeyboard()
 
   useEffect(() => {
     if ( isFirstBox ) {
@@ -14,23 +16,33 @@ function LetterBox({ letter, status, isFirstBox }: LetterBoxProps) {
     }
   }, [ isFirstBox ])
 
-
+  const handleFocus = () => {
+    if ( typeof index === 'number' ) {
+      setActiveBoxIndex(index)
+    }
+  }
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const isLetter = VALID_LETTERS_REGEX.test(e.key)
+
+    if ( isLetter && !inputRef.current?.value ) {
+      setIsAnimating(true)
+      setTimeout(() => {
+        ( inputRef.current?.nextElementSibling as HTMLInputElement | null )?.focus()
+        setIsAnimating(false)
+      }, 50)
+    }
     processKey(e.key)
-    setIsAnimating(true)
-    setTimeout(() => {
-      ( inputRef.current?.nextElementSibling as HTMLInputElement | null )?.focus()
-      setIsAnimating(false)
-    }, 50)
   }
 
   return (
     <input
       ref={ inputRef }
       type="text"
+      id={ `input-${ currentRow }-${ index }` }
       maxLength={ 1 }
       value={ letter }
       onKeyDown={ handleKeyDown }
+      onFocus={ handleFocus }
       className={ `
         w-[52px] h-[52px] text-center uppercase font-bold text-[2rem] text-white
         focus:outline-none transition-transform duration-75
