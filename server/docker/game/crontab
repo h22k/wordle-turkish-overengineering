@@ -1,0 +1,2 @@
+# Run game rotation at midnight (00:00) every day
+0 0 * * * go run /app/cmd/game/main.go >> /var/log/cron.log 2>&1 

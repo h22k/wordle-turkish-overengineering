@@ -12,6 +12,8 @@ type ucase interface {
 	NewGameCommand() *command.NewGameCommand
 	MakeGuessCommand() *command.MakeGuessCommand
 
+	MakeGameInactiveCommand() *command.MakeGameInactiveCommand
+
 	GameQuery() *query.GameQuery
 	VocableQuery() *query.VocableQuery
 	GuessQuery() *query.GuessQuery
@@ -29,6 +31,7 @@ func initService(uc ucase, wordCheckerChain *domain.WordCheckerChain) *appServic
 			uc.MakeGuessCommand(),
 			uc.NewGameCommand(),
 			uc.AddWordCommand(),
+			uc.MakeGameInactiveCommand(),
 			uc.GameQuery(),
 			uc.VocableQuery(),
 			uc.GuessQuery(),

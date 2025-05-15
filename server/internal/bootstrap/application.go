@@ -39,10 +39,13 @@ func InitApplication(ctx context.Context, cfg config.Config) *Application {
 	useCase := initUseCases(pgDb, newRedisCache())
 	as := initService(useCase, initChecker(useCase))
 
+	e := echo.New()
+	e.Validator = validator2.NewValidator()
+
 	return &Application{
 		appService: as,
 		cfg:        cfg,
-		echoApp:    echo.New(),
+		echoApp:    e,
 		db:         pgPoolConn,
 		dbListener: pgListener,
 		ctx:        ctx,
@@ -106,9 +109,8 @@ func (a *Application) setGameRoutes(gameRoute *echo.Group, v validator3.InputVal
 	go gameDispatcher.Start(a.ctx, "game_created")
 
 	gameRoute.GET("/game", gameHandler.GetGame())
-
-	gameRoute.POST("/guess", gameHandler.MakeGuess())
-	gameRoute.GET("/events/:name", gameHandler.Sse(gameBroker))
+	gameRoute.POST("/guess", middleware.ValidateRequest(gameHandler.MakeGuess))
+	gameRoute.GET("/events", gameHandler.Sse(gameBroker))
 }
 
 func (a *Application) setProfiler() {

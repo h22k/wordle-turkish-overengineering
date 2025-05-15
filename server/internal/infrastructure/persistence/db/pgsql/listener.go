@@ -2,7 +2,6 @@ package pgsql
 
 import (
 	"context"
-	"fmt"
 
 	application "github.com/h22k/wordle-turkish-overengineering/server/internal/application/event"
 	"github.com/h22k/wordle-turkish-overengineering/server/internal/domain/event"
@@ -31,7 +30,7 @@ func (el *EventListener) Listen(ctx context.Context, eventName string, handler a
 		if err != nil {
 			return err
 		}
-		fmt.Println(notification.Payload)
+
 		handler(event.NewEvent(eventName, notification.Payload))
 	}
 }

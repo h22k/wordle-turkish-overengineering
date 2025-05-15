@@ -7,17 +7,17 @@ import (
 )
 
 type WordCommand struct {
-	WordRepo domain.VocableRepository
+	wordRepo domain.VocableRepository
 }
 
 func NewWordCommand(wordRepo domain.VocableRepository) *WordCommand {
 	return &WordCommand{
-		WordRepo: wordRepo,
+		wordRepo: wordRepo,
 	}
 }
 
 func (awc WordCommand) AddWord(ctx context.Context, word domain.Word) error {
-	if err := awc.WordRepo.Save(ctx, domain.NewVocable(word)); err != nil {
+	if err := awc.wordRepo.Save(ctx, domain.NewVocable(word)); err != nil {
 		return err
 	}
 

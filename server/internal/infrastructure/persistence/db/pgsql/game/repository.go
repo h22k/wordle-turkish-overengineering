@@ -3,6 +3,7 @@ package game
 import (
 	"context"
 
+	"github.com/google/uuid"
 	domain "github.com/h22k/wordle-turkish-overengineering/server/internal/domain/game"
 	"github.com/h22k/wordle-turkish-overengineering/server/internal/infrastructure/persistence/db/pgsql/game/query"
 )
@@ -17,9 +18,9 @@ func NewRepository(queries *query.Queries) *Repository {
 	}
 }
 
-func (r Repository) Save(ctx context.Context, game domain.Game) error {
+func (r Repository) Save(ctx context.Context, game domain.Game, wordId int32) error {
 	_, err := r.queries.CreateGame(ctx, query.CreateGameParams{
-		SecretWord:  game.Word.String(),
+		WordID:      wordId,
 		MaxAttempts: int32(game.MaxWordGuesses),
 		WordLength:  int32(game.Word.Len()),
 	})
@@ -35,4 +36,10 @@ func (r Repository) GetLastGame(ctx context.Context) (domain.Game, error) {
 	}
 
 	return domain.NewGameWithId(domain.Word(game.SecretWord), game.ID), nil
+}
+
+func (r Repository) MakeGameInactive(ctx context.Context, gameId uuid.UUID) error {
+	_, err := r.queries.MakeGameInactive(ctx, gameId)
+
+	return err
 }

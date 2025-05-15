@@ -45,32 +45,21 @@ func (h *Handler) GetGame() echo.HandlerFunc {
 	}
 }
 
-func (h *Handler) MakeGuess() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		sessionId, _ := c.Cookie("session_id")
-		if sessionId == nil {
-			sessionId = &http.Cookie{Value: ""}
-		}
-
-		var req commonGame.MakeGuessRequest
-		if err := c.Bind(&req); err != nil {
-			return response.BadRequest(c, err)
-		}
-
-		if err := h.iv.Validate(req); err != nil {
-			return response.BadRequest(c, err)
-		}
-
-		guess, err := h.gameService.MakeGuess(c.Request().Context(), sessionId.Value, req.Guess)
-		if err != nil {
-			return response.BadRequest(c, err)
-		}
-
-		return response.Created(c, commonGame.GuessedWordResponse{
-			Word:    guess.Guess.String(),
-			Letters: commonGame.LettersToView(guess.Letters),
-		})
+func (h *Handler) MakeGuess(c echo.Context, req *commonGame.MakeGuessRequest) error {
+	sessionId, _ := c.Cookie("session_id")
+	if sessionId == nil {
+		sessionId = &http.Cookie{Value: ""}
 	}
+
+	guess, err := h.gameService.MakeGuess(c.Request().Context(), sessionId.Value, req.Guess)
+	if err != nil {
+		return response.BadRequest(c, err)
+	}
+
+	return response.Created(c, commonGame.GuessedWordResponse{
+		Word:    guess.Guess.String(),
+		Letters: commonGame.LettersToView(guess.Letters),
+	})
 }
 
 func (h *Handler) Sse(broker *event.Broker) echo.HandlerFunc {
@@ -82,15 +71,18 @@ func (h *Handler) Sse(broker *event.Broker) echo.HandlerFunc {
 		c.Response().Header().Set("Transfer-Encoding", "chunked")
 		c.Response().Header().Set("Access-Control-Allow-Origin", "*")
 
-		name := c.Param("name")
 		ch := broker.Subscribe()
-
-		fmt.Println("SSE connection opened:" + name)
-		defer fmt.Println("SSE connection closed:" + name)
 
 		c.Response().Writer.WriteHeader(http.StatusOK)
 
-		keepAliveTicker := time.NewTicker(1 * time.Second)
+		if _, err := fmt.Fprintf(c.Response().Writer, ":connected\n\n"); err != nil {
+			log.Printf("Error while writing connected: %v\n", err)
+			return err
+		}
+
+		c.Response().Flush()
+
+		keepAliveTicker := time.NewTicker(1 * time.Minute)
 		defer keepAliveTicker.Stop()
 
 		for {
@@ -101,11 +93,11 @@ func (h *Handler) Sse(broker *event.Broker) echo.HandlerFunc {
 
 			case ev, ok := <-ch:
 				if !ok {
-					log.Printf("Channel closed\nname: %s\n", name)
+					log.Printf("Channel closed\n")
 					return nil
 				}
 
-				if _, err := fmt.Fprintf(c.Response().Writer, "event: game_created\ndata: %s\n\n", ev.Name()); err != nil {
+				if _, err := fmt.Fprintf(c.Response().Writer, "id:%s\nevent: game_created\ndata: %s\n\n", ev.Payload(), ev.Name()); err != nil {
 					log.Printf("Error while writing Data: %v\n", err)
 					return err
 				}
