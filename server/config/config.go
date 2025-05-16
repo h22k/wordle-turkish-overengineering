@@ -37,7 +37,7 @@ func LoadConfig() Config {
 	envFile := os.Getenv("ENV_FILE")
 
 	if err := godotenv.Load(envFile); err != nil {
-		log.Println("Error loading .env file.")
+		log.Println("Error loading .env file")
 	}
 
 	conf := Config{
