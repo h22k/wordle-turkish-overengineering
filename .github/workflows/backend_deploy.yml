@@ -2,7 +2,7 @@ name: CI/CD Deploy to EC2 with ECR and .env
 
 on:
   push:
-    branches: [ production ]
+    branches: [ main ]
     paths:
       - ./server/**
       - ./.github/workflows/backend_deploy.yml
