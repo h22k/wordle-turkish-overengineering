@@ -2,7 +2,7 @@
 FROM golang:1.23-alpine AS builder
 
 # Install necessary packages
-RUN apk add --no-cache git
+RUN apk add --no-cache git tzdata
 
 WORKDIR /app
 
@@ -21,6 +21,9 @@ FROM scratch
 
 # Copy CA certificates (needed for TLS/HTTPS)
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+
+# Copy timezone data (if needed)
+COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 
 # Copy the built binary from the builder stage
 COPY --from=builder /app/app /app/app
