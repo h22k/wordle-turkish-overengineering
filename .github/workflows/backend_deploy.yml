@@ -37,7 +37,7 @@ jobs:
           IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG"
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
 
-          docker build -f server/production.Dockerfile -t $IMAGE_URI .
+          docker build -f server/production.Dockerfile -t $IMAGE_URI server/
           docker push $IMAGE_URI
 
       - name: Upload .env.production to EC2
