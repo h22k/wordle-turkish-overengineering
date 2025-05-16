@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"time"
@@ -35,7 +36,7 @@ type Config struct {
 func LoadConfig() Config {
 	envFile := os.Getenv("ENV_FILE")
 	if err := godotenv.Load(envFile); err != nil {
-		panic("Error loading .env file")
+		log.Println("Error loading .env file")
 	}
 
 	conf := Config{

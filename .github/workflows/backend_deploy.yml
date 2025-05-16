@@ -1,0 +1,69 @@
+name: CI/CD Deploy to EC2 with ECR and .env
+
+on:
+  push:
+    branches: [ production ]
+    paths:
+      - ./server/**
+      - ./.github/workflows/backend_deploy.yml
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and Push Docker image
+        run: |
+          IMAGE_TAG=$(date +%s)
+          IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG"
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+
+          docker build -f ./production.Dockerfile -t $IMAGE_URI .
+          docker push $IMAGE_URI
+
+      - name: Upload .env.production to EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "${{ secrets.ENV_FILE_CONTENT }}" > /home/${{ secrets.EC2_USER }}/.env.production
+            chmod 600 /home/${{ secrets.EC2_USER }}/.env.production
+
+      - name: Deploy and run Docker container on EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            IMAGE_URI=${{ env.IMAGE_URI }}
+
+            docker pull $IMAGE_URI
+
+            docker stop go-app || true
+            docker rm go-app || true
+
+            docker run -d --name go-app \
+              --env-file /home/${{ secrets.EC2_USER }}/.env.production \
+              -p 8080:8080 $IMAGE_URI
