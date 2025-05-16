@@ -6,6 +6,7 @@ on:
     paths:
       - 'server/**'
       - '.github/workflows/backend_deploy.yml'
+  workflow_dispatch:
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
