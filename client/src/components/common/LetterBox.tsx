@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { STATUS_COLOR, VALID_LETTERS_REGEX } from '../../gameConfig'
+import React, { useEffect, useRef } from 'react'
+import { STATUS_COLOR } from '../../gameConfig'
 import { LetterBoxProps } from '../../types/game'
 import { useKeyboardEvents } from '../../hooks/useKeyboardEvents'
 import { useKeyboard } from '../../hooks/useKeyboard'
