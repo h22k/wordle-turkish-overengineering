@@ -4,6 +4,7 @@ set -e
 
 docker run -d \
       --name nginx-api \
+      --network app-network \
       -p 80:80 -p 443:443 \
       -v /etc/letsencrypt:/etc/letsencrypt:ro \
       -v ./api.conf:/etc/nginx/nginx.conf:ro \
