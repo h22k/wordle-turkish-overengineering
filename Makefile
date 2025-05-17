@@ -44,13 +44,5 @@ game-rotator:
 	  -e ENV_FILE=/app/.env \
 	  golang:1.23-alpine \
 	  sh -c "go mod download && go run cmd/word/main.go"
-nginx-server: # just for production purposes do not use in development
-	docker run -d \
-      --name nginx-api \
-      -p 80:80 -p 443:443 \
-      -v /etc/letsencrypt:/etc/letsencrypt:ro \
-      -v ./server/docker/nginx/api.conf:/etc/nginx/nginx.conf:ro \
-      -v /var/www/webroot:/var/www/certbot:ro \
-      nginx:stable-alpine
 cold-start:
 	bash ./cold_start.sh
