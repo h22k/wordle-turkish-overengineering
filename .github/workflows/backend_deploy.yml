@@ -66,5 +66,6 @@ jobs:
             docker rm go-app || true
 
             docker run -d --name go-app \
+              --network app-network \
               --env-file /home/${{ secrets.EC2_USER }}/.env.production \
               -p 8080:8080 $IMAGE_URI
