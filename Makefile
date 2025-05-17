@@ -34,15 +34,5 @@ word-seed:
 	  -e ENV_FILE=/app/.env \
 	  wordle-turkish-overengineering-server \
 	  go run cmd/word/main.go
-game-rotator:
-	docker run --rm \
-	  --name task-runner \
-	  --network=host \
-	  -v ./server:/app \
-	  -w /app \
-	  --env-file ./server/.env \
-	  -e ENV_FILE=/app/.env \
-	  golang:1.23-alpine \
-	  sh -c "go mod download && go run cmd/word/main.go"
 cold-start:
 	bash ./cold_start.sh
