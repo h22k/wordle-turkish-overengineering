@@ -1,7 +1,7 @@
 import React, { createContext, useState } from 'react'
 import { MAX_ATTEMPTS, VALID_LETTERS_REGEX, WORD_LENGTH } from '../gameConfig'
 import { KeyboardContextType, LetterProps, LetterStatus } from '../types/game'
-import { useToast } from './toastContext'
+import { useToast } from '../hooks/useToast'
 
 export const KeyboardContext = createContext<KeyboardContextType | undefined>(undefined)
 
@@ -56,7 +56,7 @@ export const KeyboardProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
   }
 
   const deleteLetter = () => {
-    if ( activeBoxIndex <= 0 ) return
+    if ( activeBoxIndex < 0 ) return
 
     const updatedLetters = [ ...letters ]
     const currentBox = updatedLetters[currentRow][activeBoxIndex]

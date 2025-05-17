@@ -6,8 +6,7 @@ import { useKeyboard } from '../../hooks/useKeyboard'
 
 function LetterBox({ letter, status, isFirstBox, index, rowIndex }: LetterBoxProps) {
   const inputRef = useRef<HTMLInputElement>(null)
-  const [ isAnimating, setIsAnimating ] = useState(false)
-  const { processKey } = useKeyboardEvents()
+  const { processKey, isAnimating } = useKeyboardEvents(inputRef)
   const { setActiveBoxIndex } = useKeyboard()
 
   useEffect(() => {
@@ -23,15 +22,6 @@ function LetterBox({ letter, status, isFirstBox, index, rowIndex }: LetterBoxPro
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    const isLetter = VALID_LETTERS_REGEX.test(e.key)
-
-    if ( isLetter && !inputRef.current?.value ) {
-      setIsAnimating(true)
-      setTimeout(() => {
-        ( inputRef.current?.nextElementSibling as HTMLInputElement | null )?.focus()
-        setIsAnimating(false)
-      }, 50)
-    }
     processKey(e.key)
   }
 

@@ -1,7 +1,7 @@
 import React, { createContext, useContext } from 'react'
 import { cssTransition, toast, ToastContainer } from 'react-toastify'
 
-const ToastContext = createContext({
+export const ToastContext = createContext({
   notify: (msg: string) => {
   },
 })
@@ -32,5 +32,3 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     </ToastContext.Provider>
   )
 }
-
-export const useToast = () => useContext(ToastContext)
