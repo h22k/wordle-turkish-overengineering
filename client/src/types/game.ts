@@ -19,6 +19,8 @@ export interface KeyboardContextType {
   setActiveBoxIndex: (index: number) => void
   shakeRowIndex: number | null
   triggerShake: (row: number) => void
+  getFirstEmptyBoxIndex: (row: number) => number
+  submittedRow: number | null
 }
 
 export interface LetterRowProps {
@@ -38,4 +40,14 @@ export interface LetterBoxProps {
   isFirstBox: boolean
   index?: number
   rowIndex?: number
+}
+
+export interface APILetter {
+  char: string
+  status: LetterStatus
+}
+
+export interface APIGuess {
+  word: string
+  letters: APILetter[]
 }

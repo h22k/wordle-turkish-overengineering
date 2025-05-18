@@ -1,7 +1,8 @@
-import React, { createContext, useState } from 'react'
+import React, { createContext, useEffect, useState } from 'react'
 import { MAX_ATTEMPTS, VALID_LETTERS_REGEX, WORD_LENGTH } from '../gameConfig'
-import { KeyboardContextType, LetterProps, LetterStatus } from '../types/game'
+import { APIGuess, KeyboardContextType, LetterProps, LetterStatus } from '../types/game'
 import { useToast } from '../hooks/useToast'
+import axiosClient from '../api/axiosClient'
 
 export const KeyboardContext = createContext<KeyboardContextType | undefined>(undefined)
 
@@ -14,12 +15,51 @@ export const KeyboardProvider: React.FC<React.PropsWithChildren<object>> = ({ ch
   const [currentRow, setCurrentRow] = useState(0)
   const [activeBoxIndex, setActiveBoxIndex] = useState(0)
   const [shakeRowIndex, setShakeRowIndex] = useState<number | null>(null)
-
+  const [submittedRow, setSubmittedRow] = useState<number | null>(null)
   const { notify } = useToast()
+
+  useEffect(() => {
+    const fetchGame = async () => {
+      try {
+        const res = await axiosClient.get('/game/game')
+
+        const { guesses, max_guesses }: { guesses: APIGuess[]; max_guesses: number } = res.data.data
+
+        const filled = guesses.map((guess) =>
+          guess.letters.map((letter) => ({
+            char: letter.char,
+            status: letter.status,
+          }))
+        )
+
+        const remaining = Array.from({ length: max_guesses - filled.length }).map(() =>
+          Array.from({ length: WORD_LENGTH }).map(() => ({
+            char: '',
+            status: LetterStatus.EMPTY,
+          }))
+        )
+
+        setLetters([...filled, ...remaining])
+        setCurrentRow(filled.length)
+      } catch (err: any) {
+        const message = err?.message || 'Oyun Yüklenemedi.'
+        notify(message)
+      }
+    }
+
+    fetchGame()
+  }, [])
 
   const triggerShake = (row: number) => {
     setShakeRowIndex(row)
     setTimeout(() => setShakeRowIndex(null), 500)
+  }
+
+  const focusInput = (row: number, index: number) => {
+    setTimeout(() => {
+      const input = document.getElementById(`input-${row}-${index}`) as HTMLInputElement | null
+      input?.focus()
+    }, 0)
   }
 
   const moveToNextRow = () => {
@@ -28,13 +68,6 @@ export const KeyboardProvider: React.FC<React.PropsWithChildren<object>> = ({ ch
       setActiveBoxIndex(0)
       focusInput(currentRow + 1, 0)
     }
-  }
-
-  const focusInput = (row: number, index: number) => {
-    setTimeout(() => {
-      const input = document.getElementById(`input-${row}-${index}`) as HTMLInputElement | null
-      input?.focus()
-    }, 0)
   }
 
   const addLetter = (value: string) => {
@@ -72,29 +105,53 @@ export const KeyboardProvider: React.FC<React.PropsWithChildren<object>> = ({ ch
     setLetters(updatedLetters)
   }
 
-  const submitWord = () => {
+  const submitWord = async () => {
     const currentWord = letters[currentRow]
     const filledLetters = currentWord.filter((letter) => letter.char !== '')
 
-    if (filledLetters.length === WORD_LENGTH) {
-      moveToNextRow()
-    } else {
+    if (filledLetters.length !== WORD_LENGTH) {
       notify('Harf sayısı yetersiz')
+      triggerShake(currentRow)
+      return
+    }
+
+    try {
+      const res = await axiosClient.post('/game/guess', {
+        guess: currentWord?.map((l) => l.char).join(''),
+      })
+
+      const updated = [...letters]
+      updated[currentRow] = res?.data?.data?.letters?.map((l: any) => ({
+        char: l.char,
+        status: l.status,
+      }))
+      setLetters(updated)
+
+      setSubmittedRow(currentRow)
+      moveToNextRow()
+    } catch (err: any) {
+      const message = err?.response?.data?.error || err?.message || 'Bir hata oluştu'
+
+      notify(message)
       triggerShake(currentRow)
     }
   }
 
-  const handleChange = (value: string) => {
-    const upperValue = value.toUpperCase()
+  const handleChange = async (value: string) => {
+    const upperValue = value.toLocaleUpperCase('tr')
 
     if (upperValue === 'BACKSPACE') {
       deleteLetter()
     } else if (upperValue === 'ENTER') {
-      submitWord()
+      await submitWord()
     } else if (VALID_LETTERS_REGEX.test(upperValue)) {
       addLetter(upperValue)
       setActiveBoxIndex(Math.min(activeBoxIndex + 1, WORD_LENGTH - 1))
     }
+  }
+
+  const getFirstEmptyBoxIndex = (row: number) => {
+    return letters?.[row]?.findIndex((letter) => letter.char === '')
   }
 
   return (
@@ -108,6 +165,8 @@ export const KeyboardProvider: React.FC<React.PropsWithChildren<object>> = ({ ch
         setActiveBoxIndex,
         shakeRowIndex,
         triggerShake,
+        getFirstEmptyBoxIndex,
+        submittedRow,
       }}
     >
       {children}
