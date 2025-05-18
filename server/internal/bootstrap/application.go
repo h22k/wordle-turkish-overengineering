@@ -44,7 +44,7 @@ func InitApplication(ctx context.Context, cfg config.Config) *Application {
 
 	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
 		AllowOrigins: cfg.AllowOrigins,
-		AllowMethods: []string{echo.GET, echo.POST, echo.OPTIONS},
+		AllowMethods: []string{echo.GET, echo.POST, echo.OPTIONS, echo.PUT, echo.DELETE},
 	}))
 
 	return &Application{
@@ -106,6 +106,7 @@ func (a *Application) setMiddlewares() {
 	a.echoApp.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			c.Response().Header().Set(echo.HeaderAccessControlAllowCredentials, "true")
+			c.Response().Header().Set(echo.HeaderAccessControlAllowMethods, "GET, POST, PUT, DELETE, OPTIONS")
 			return next(c)
 		}
 	})
