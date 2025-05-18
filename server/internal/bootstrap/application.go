@@ -103,6 +103,12 @@ func (a *Application) setMiddlewares() {
 	a.echoApp.Use(middleware.ServerTimingMiddleware())
 	a.echoApp.Use(middleware.IdentifierCookieMiddleware(a.cfg.CookieDomain, a.cfg.IsProd()))
 	a.echoApp.Use(echoMiddleware.RequestID())
+	a.echoApp.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			c.Response().Header().Set(echo.HeaderAccessControlAllowCredentials, "true")
+			return next(c)
+		}
+	})
 }
 
 func (a *Application) setGameRoutes(gameRoute *echo.Group, v validator3.InputValidator) {
