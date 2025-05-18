@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -27,6 +28,8 @@ type Config struct {
 	MinDbConns        int32
 	MaxDbIdleTime     time.Duration
 	MaxDbConnLifeTime time.Duration
+
+	AllowOrigins []string
 
 	DbUrl string
 
@@ -53,6 +56,7 @@ func LoadConfig() Config {
 		MaxDbConns:   getValue("MAX_DB_CONNECTIONS", int32(10)),
 		MinDbConns:   getValue("MIN_DB_CONNECTIONS", int32(1)),
 		PyroscopeUrl: getValue("PYROSCOPE_URL", ""),
+		AllowOrigins: strToArraySeparatedByComma(getValue("ALLOW_ORIGINS", "")),
 	}
 
 	conf.DbUrl = conf.DBConnection + "://" + conf.DbUser + ":" + conf.DbPassword + "@" + conf.DbHost + ":" + conf.DbPort + "/" + conf.DbName
@@ -60,6 +64,19 @@ func LoadConfig() Config {
 	conf.MaxDbIdleTime = 10 * time.Minute
 
 	return conf
+}
+
+func strToArraySeparatedByComma(str string) []string {
+	if str == "" {
+		return nil
+	}
+
+	result := make([]string, 0)
+	for _, s := range strings.Split(str, ",") {
+		result = append(result, strings.TrimSpace(s))
+	}
+
+	return result
 }
 
 func getValue[T string | int | int32](key string, def T) T {

@@ -7,17 +7,17 @@ function LetterRow({ rowIndex }: LetterRowProps) {
   const shouldShake = shakeRowIndex === rowIndex
 
   return (
-    <div className={ `flex gap-[5px] ${ shouldShake ? 'animate-wiggle' : '' }` } id={ `row-${ rowIndex }` }>
-      { letters[rowIndex].map((letter: LetterProps, index: number) => (
+    <div className={`flex gap-[5px] ${shouldShake ? 'animate-wiggle' : ''}`} id={`row-${rowIndex}`}>
+      {letters[rowIndex].map((letter: LetterProps, index: number) => (
         <LetterBox
-          key={ index }
-          letter={ letter.char }
-          status={ letter.status }
-          index={ index }
-          rowIndex={ rowIndex }
-          isFirstBox={ rowIndex === currentRow && index === activeBoxIndex }
+          key={index}
+          letter={letter.char}
+          status={letter.status}
+          index={index}
+          rowIndex={rowIndex}
+          isFirstBox={rowIndex === currentRow && index === activeBoxIndex}
         />
-      )) }
+      ))}
     </div>
   )
 }

@@ -1,9 +1,9 @@
-import React, { createContext, useContext } from 'react'
+import React, { createContext } from 'react'
 import { cssTransition, toast, ToastContainer } from 'react-toastify'
 
 export const ToastContext = createContext({
-  notify: (msg: string) => {
-  },
+  // @typescript-eslint/no-unused-vars
+  notify: (msg: string) => {},
 })
 
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -15,20 +15,21 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       closeOnClick: false,
       closeButton: false,
       pauseOnHover: true,
-      className: 'text-sm text-black font-semibold rounded-md shadow-md px-2 py-1 min-w-0 w-auto! min-h-0!',
+      className:
+        'text-sm text-black font-semibold rounded-md shadow-md px-2 py-1 min-w-0 w-auto! min-h-0!',
       icon: false,
     })
   }
 
   return (
-    <ToastContext.Provider value={ { notify } }>
+    <ToastContext.Provider value={{ notify }}>
       <ToastContainer
-        transition={ cssTransition({
+        transition={cssTransition({
           enter: 'none',
           exit: 'fadeOut',
-        }) }
+        })}
       />
-      { children }
+      {children}
     </ToastContext.Provider>
   )
 }

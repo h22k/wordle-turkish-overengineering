@@ -7,13 +7,9 @@ function Board() {
 
   return (
     <div className="grid gap-[5px]">
-      { Array.from({ length: MAX_ATTEMPTS }).map((_, i) => (
-        <LetterRow
-          key={ i }
-          rowIndex={ i }
-          currentRow={ currentRow }
-        />
-      )) }
+      {Array.from({ length: MAX_ATTEMPTS }).map((_, i) => (
+        <LetterRow key={i} rowIndex={i} currentRow={currentRow} />
+      ))}
     </div>
   )
 }
