@@ -87,7 +87,7 @@ func (q *Queries) CreateGuess(ctx context.Context, arg CreateGuessParams) (Guess
 const findGameById = `-- name: FindGameById :one
 SELECT g.id, g.word_id, g.word_length, g.max_attempts, g.is_active, g.created_at, g.updated_at, w.word as secret_word
 FROM games g
-JOIN word_pool w ON w.id = g.word_id
+         JOIN word_pool w ON w.id = g.word_id
 WHERE g.id = $1
 `
 
@@ -134,7 +134,7 @@ func (q *Queries) FindWord(ctx context.Context, word string) (WordPool, error) {
 const getActiveGame = `-- name: GetActiveGame :one
 SELECT g.id, g.word_id, g.word_length, g.max_attempts, g.is_active, g.created_at, g.updated_at, w.word as secret_word
 FROM games g
-JOIN word_pool w ON w.id = g.word_id
+         JOIN word_pool w ON w.id = g.word_id
 WHERE g.is_active = true
 ORDER BY g.created_at DESC
 LIMIT 1
@@ -254,7 +254,7 @@ func (q *Queries) GetGameGuessesCount(ctx context.Context, arg GetGameGuessesCou
 const getRandomWord = `-- name: GetRandomWord :one
 SELECT id, word
 FROM word_pool
-WHERE id >= (SELECT floor(random() * (SELECT MAX(id) FROM word_pool)))
+ORDER BY RANDOM()
 LIMIT 1
 `
 
@@ -267,8 +267,8 @@ func (q *Queries) GetRandomWord(ctx context.Context) (WordPool, error) {
 
 const isValidGuess = `-- name: IsValidGuess :one
 SELECT EXISTS(SELECT 1
-             FROM word_pool
-             WHERE word = $1)
+              FROM word_pool
+              WHERE word = $1)
 `
 
 func (q *Queries) IsValidGuess(ctx context.Context, word string) (bool, error) {
@@ -280,8 +280,8 @@ func (q *Queries) IsValidGuess(ctx context.Context, word string) (bool, error) {
 
 const isWordExists = `-- name: IsWordExists :one
 SELECT EXISTS(SELECT 1
-             FROM word_pool
-             WHERE word = $1)
+              FROM word_pool
+              WHERE word = $1)
 `
 
 func (q *Queries) IsWordExists(ctx context.Context, word string) (bool, error) {

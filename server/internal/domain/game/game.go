@@ -32,7 +32,7 @@ func (w Word) Len() uint8 {
 }
 
 func (w Word) String() string {
-	return string(w)
+	return strings.Trim(strings.ToLower(string(w)), " ")
 }
 
 type Game struct {

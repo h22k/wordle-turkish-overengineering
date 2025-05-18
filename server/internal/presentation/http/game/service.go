@@ -2,6 +2,7 @@ package game
 
 import (
 	"context"
+	"strings"
 
 	application "github.com/h22k/wordle-turkish-overengineering/server/internal/application/game"
 	domain "github.com/h22k/wordle-turkish-overengineering/server/internal/domain/game"
@@ -38,7 +39,7 @@ func (s *Service) GetGameInfo(ctx context.Context, sessionId string) (domain.Gam
 }
 
 func (s *Service) MakeGuess(ctx context.Context, sessionId string, guess string) (domain.WordGuess, error) {
-	err := s.wordChecker.Check(ctx, domain.Word(guess))
+	err := s.wordChecker.Check(ctx, domain.Word(strings.ToLower(guess)))
 	if err != nil {
 		return domain.WordGuess{}, err
 	}
