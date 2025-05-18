@@ -14,6 +14,7 @@ import (
 type Config struct {
 	AppKey  string
 	AppName string
+	AppEnv  string
 
 	ServerPort string
 
@@ -30,6 +31,7 @@ type Config struct {
 	MaxDbConnLifeTime time.Duration
 
 	AllowOrigins []string
+	CookieDomain string
 
 	DbUrl string
 
@@ -46,6 +48,7 @@ func LoadConfig() Config {
 	conf := Config{
 		AppKey:       getValue("APP_KEY", ""),
 		AppName:      getValue("APP_NAME", "wordle"),
+		AppEnv:       getValue("APP_ENV", "development"),
 		ServerPort:   getValue("PORT", ":8080"),
 		DBConnection: getValue("DB_CONNECTION", "postgres"),
 		DbHost:       getValue("DB_HOST", "localhost"),
@@ -57,6 +60,7 @@ func LoadConfig() Config {
 		MinDbConns:   getValue("MIN_DB_CONNECTIONS", int32(1)),
 		PyroscopeUrl: getValue("PYROSCOPE_URL", ""),
 		AllowOrigins: strToArraySeparatedByComma(getValue("ALLOW_ORIGINS", "")),
+		CookieDomain: getValue("COOKIE_DOMAIN", ""),
 	}
 
 	conf.DbUrl = conf.DBConnection + "://" + conf.DbUser + ":" + conf.DbPassword + "@" + conf.DbHost + ":" + conf.DbPort + "/" + conf.DbName
@@ -64,6 +68,10 @@ func LoadConfig() Config {
 	conf.MaxDbIdleTime = 10 * time.Minute
 
 	return conf
+}
+
+func (c Config) IsProd() bool {
+	return c.AppEnv == "production"
 }
 
 func strToArraySeparatedByComma(str string) []string {

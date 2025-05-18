@@ -101,7 +101,7 @@ func (a *Application) setMetric() {
 func (a *Application) setMiddlewares() {
 	a.echoApp.Use(middleware.MetricsMiddleware())
 	a.echoApp.Use(middleware.ServerTimingMiddleware())
-	a.echoApp.Use(middleware.IdentifierCookieMiddleware())
+	a.echoApp.Use(middleware.IdentifierCookieMiddleware(a.cfg.CookieDomain, a.cfg.IsProd()))
 	a.echoApp.Use(echoMiddleware.RequestID())
 }
 
