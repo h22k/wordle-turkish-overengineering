@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/h22k/wordle-turkish-overengineering/server/internal/application/event"
@@ -51,7 +52,7 @@ func (h *Handler) MakeGuess(c echo.Context, req *commonGame.MakeGuessRequest) er
 		sessionId = &http.Cookie{Value: ""}
 	}
 
-	guess, err := h.gameService.MakeGuess(c.Request().Context(), sessionId.Value, req.Guess)
+	guess, err := h.gameService.MakeGuess(c.Request().Context(), sessionId.Value, strings.ToLower(req.Guess))
 	if err != nil {
 		return response.BadRequest(c, err)
 	}
