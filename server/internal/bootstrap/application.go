@@ -3,6 +3,8 @@ package bootstrap
 import (
 	"context"
 	"fmt"
+	"log"
+	"strings"
 
 	"github.com/grafana/pyroscope-go"
 	"github.com/h22k/wordle-turkish-overengineering/server/config"
@@ -43,9 +45,12 @@ func InitApplication(ctx context.Context, cfg config.Config) *Application {
 	e.Validator = validator2.NewValidator()
 
 	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
-		AllowOrigins: cfg.AllowOrigins,
-		AllowMethods: []string{echo.GET, echo.POST, echo.OPTIONS, echo.PUT, echo.DELETE},
+		AllowOrigins:     cfg.AllowOrigins,
+		AllowMethods:     []string{echo.GET, echo.POST, echo.OPTIONS, echo.PUT, echo.DELETE},
+		AllowCredentials: true,
 	}))
+
+	log.Printf("Allowing origins: %s", strings.Join(cfg.AllowOrigins, ", "))
 
 	return &Application{
 		appService: as,
