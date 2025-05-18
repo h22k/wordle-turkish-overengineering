@@ -47,8 +47,6 @@ func InitApplication(ctx context.Context, cfg config.Config) *Application {
 		AllowMethods: []string{echo.GET, echo.POST, echo.OPTIONS},
 	}))
 
-	e.Use(echoMiddleware.RateLimiterWithConfig(echoMiddleware.RateLimiterConfig{}))
-
 	return &Application{
 		appService: as,
 		cfg:        cfg,
