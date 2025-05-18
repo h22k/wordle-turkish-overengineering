@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { STATUS_COLOR } from '../../gameConfig'
 import { LetterBoxProps } from '../../types/game'
 import { useKeyboardEvents } from '../../hooks/useKeyboardEvents'
@@ -6,14 +6,10 @@ import { useKeyboard } from '../../hooks/useKeyboard'
 
 function LetterBox({ letter, status, isFirstBox, index, rowIndex }: LetterBoxProps) {
   const inputRef = useRef<HTMLInputElement>(null)
-  const { processKey, isAnimating } = useKeyboardEvents(inputRef)
+  const isSpecialKeyRef = useRef<'BACKSPACE' | 'ENTER' | null>(null)
+  const { processKey } = useKeyboardEvents(inputRef)
   const { setActiveBoxIndex } = useKeyboard()
-
-  useEffect(() => {
-    if ( isFirstBox ) {
-      inputRef.current?.focus()
-    }
-  }, [ isFirstBox ])
+  const [ isAnimating, setIsAnimating ] = useState(false)
 
   const handleFocus = () => {
     if ( typeof index === 'number' ) {
@@ -21,17 +17,41 @@ function LetterBox({ letter, status, isFirstBox, index, rowIndex }: LetterBoxPro
     }
   }
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    processKey(e.target.value.toUpperCase())
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    processKey(e.key)
+    const key = e.key.toUpperCase()
+
+    if ( key === 'ENTER' || key === 'BACKSPACE' ) {
+      processKey(key)
+      return
+    }
+    else {
+      handleAnimation()
+      isSpecialKeyRef.current = null
+    }
+  }
+
+  const handleAnimation = () => {
+    if ( !inputRef?.current?.value ) {
+      setIsAnimating(true)
+      setTimeout(() => {
+        setIsAnimating(false)
+      }, 50)
+    }
   }
 
   return (
     <input
+      autoFocus={ isFirstBox }
       ref={ inputRef }
       type="text"
       id={ `input-${ rowIndex }-${ index }` }
       maxLength={ 1 }
       value={ letter }
+      onChange={ handleChange }
       onKeyDown={ handleKeyDown }
       onMouseDown={ (e: React.MouseEvent<HTMLInputElement>) => e.preventDefault() }
       onFocus={ handleFocus }
