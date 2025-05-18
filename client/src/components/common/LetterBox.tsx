@@ -10,13 +10,13 @@ function LetterBox({ letter, status, isFirstBox, index, rowIndex }: LetterBoxPro
   const { setActiveBoxIndex } = useKeyboard()
 
   useEffect(() => {
-    if ( isFirstBox ) {
+    if (isFirstBox) {
       inputRef.current?.focus()
     }
-  }, [ isFirstBox ])
+  }, [isFirstBox])
 
   const handleFocus = () => {
-    if ( typeof index === 'number' ) {
+    if (typeof index === 'number') {
       setActiveBoxIndex(index)
     }
   }
@@ -27,20 +27,20 @@ function LetterBox({ letter, status, isFirstBox, index, rowIndex }: LetterBoxPro
 
   return (
     <input
-      ref={ inputRef }
+      ref={inputRef}
       type="text"
-      id={ `input-${ rowIndex }-${ index }` }
-      maxLength={ 1 }
-      value={ letter }
-      onKeyDown={ handleKeyDown }
-      onMouseDown={ (e: React.MouseEvent<HTMLInputElement>) => e.preventDefault() }
-      onFocus={ handleFocus }
-      className={ `
+      id={`input-${rowIndex}-${index}`}
+      maxLength={1}
+      value={letter}
+      onKeyDown={handleKeyDown}
+      onMouseDown={(e: React.MouseEvent<HTMLInputElement>) => e.preventDefault()}
+      onFocus={handleFocus}
+      className={`
         w-[52px] h-[52px] text-center uppercase font-bold text-[2rem] text-white
         focus:outline-none transition-transform duration-75
-        caret-transparent cursor-default select-none ${ STATUS_COLOR[status] }
-        ${ isAnimating ? 'scale-110' : 'scale-100' }
-      ` }
+        caret-transparent cursor-default select-none ${STATUS_COLOR[status]}
+        ${isAnimating ? 'scale-110' : 'scale-100'}
+      `}
     />
   )
 }

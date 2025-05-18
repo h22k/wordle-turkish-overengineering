@@ -42,6 +42,13 @@ func InitApplication(ctx context.Context, cfg config.Config) *Application {
 	e := echo.New()
 	e.Validator = validator2.NewValidator()
 
+	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
+		AllowOrigins: cfg.AllowOrigins,
+		AllowMethods: []string{echo.GET, echo.POST, echo.OPTIONS},
+	}))
+
+	e.Use(echoMiddleware.RateLimiterWithConfig(echoMiddleware.RateLimiterConfig{}))
+
 	return &Application{
 		appService: as,
 		cfg:        cfg,

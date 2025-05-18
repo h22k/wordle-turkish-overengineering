@@ -9,9 +9,9 @@ function App() {
     <ToastProvider>
       <KeyboardProvider>
         <div className="flex items-center flex-col gap-3 justify-center p-5">
-          <ToastContainer aria-label={ undefined }/>
-          <Board/>
-          <Keyboard/>
+          <ToastContainer aria-label={undefined} />
+          <Board />
+          <Keyboard />
         </div>
       </KeyboardProvider>
     </ToastProvider>

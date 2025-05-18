@@ -4,12 +4,13 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    react(),
-    tailwindcss(),
-  ],
+  plugins: [react(), tailwindcss()],
   server: {
     host: true,
-    allowedHosts: ['client.wordle-turkish-overengineering.orb.local', 'wordle.local', 'https://wordle.local']
-  }
+    allowedHosts: [
+      'client.wordle-turkish-overengineering.orb.local',
+      'wordle.local',
+      'https://wordle.local',
+    ],
+  },
 })
