@@ -13,13 +13,15 @@ func IdentifierCookieMiddleware() echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			cookie, err := c.Cookie("session_id")
 			if err != nil || cookie.Value == "" {
-				c.SetCookie(&http.Cookie{
+				cookie := &http.Cookie{
 					Name:     "session_id",
 					Value:    uuid.NewString(),
 					HttpOnly: true,
 					SameSite: http.SameSiteLaxMode,
 					MaxAge:   int(time.Hour.Seconds()) * 24 * 30, // 30 days
-				})
+				}
+				c.SetCookie(cookie)
+				c.Set("session_id", cookie)
 			}
 			return next(c)
 		}

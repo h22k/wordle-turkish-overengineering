@@ -30,7 +30,7 @@ func (h *Handler) GetGame() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		sessionId, _ := c.Cookie("session_id")
 		if sessionId == nil {
-			sessionId = &http.Cookie{Value: ""}
+			sessionId = c.Get("session_id").(*http.Cookie)
 		}
 
 		game, err := h.gameService.GetGameInfo(c.Request().Context(), sessionId.Value)
@@ -49,7 +49,7 @@ func (h *Handler) GetGame() echo.HandlerFunc {
 func (h *Handler) MakeGuess(c echo.Context, req *commonGame.MakeGuessRequest) error {
 	sessionId, _ := c.Cookie("session_id")
 	if sessionId == nil {
-		sessionId = &http.Cookie{Value: ""}
+		sessionId = c.Get("session_id").(*http.Cookie)
 	}
 
 	guess, err := h.gameService.MakeGuess(c.Request().Context(), sessionId.Value, strings.ToLower(req.Guess))
