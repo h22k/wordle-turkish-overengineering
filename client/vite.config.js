@@ -10,6 +10,6 @@ export default defineConfig({
   ],
   server: {
     host: true,
-    allowedHosts: ['client.wordle-turkish-overengineering.orb.local', 'wordle.local']
+    allowedHosts: ['client.wordle-turkish-overengineering.orb.local', 'wordle.local', 'https://wordle.local']
   }
 })
