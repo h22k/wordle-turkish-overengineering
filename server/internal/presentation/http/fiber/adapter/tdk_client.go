@@ -3,15 +3,13 @@ package adapter
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 
-	"github.com/gofiber/fiber/v2"
 	"github.com/h22k/wordle-turkish-overengineering/server/internal/application/game/checker"
 )
 
 var TdkClientErr = errors.New("tdk client error")
-
-type fiberGetFunc func(url string) *fiber.Agent
 
 type TdkResponse struct {
 	isExists bool
@@ -22,36 +20,39 @@ func (t TdkResponse) IsWordAcceptable() bool {
 }
 
 type TdkClient struct {
-	client fiberGetFunc
+	client *http.Client
 }
 
-func NewTdkClient(client fiberGetFunc) *TdkClient {
+func NewTdkClient(client *http.Client) *TdkClient {
 	return &TdkClient{
 		client: client,
 	}
 }
 
 func (t TdkClient) Get(url string) (checker.TdkResponse, error) {
-	agent := t.client(url)
-	statusCode, body, errs := agent.Bytes()
+	resp, err := t.client.Get(url)
+	defer resp.Body.Close()
 
-	if len(errs) > 0 {
-		return TdkResponse{}, errs[0]
-	}
-
-	if statusCode >= http.StatusBadRequest {
-		return TdkResponse{}, TdkClientErr
-	}
-
-	var fiberMap fiber.Map
-	err := json.Unmarshal(body, &fiberMap)
-
-	var ute *json.UnmarshalTypeError
-	if err != nil && !errors.As(err, &ute) {
+	if err != nil {
 		return TdkResponse{}, err
 	}
 
-	_, isErrorOccurred := fiberMap["error"]
+	if resp.StatusCode >= http.StatusBadRequest {
+		return TdkResponse{}, TdkClientErr
+	}
+
+	body, err := io.ReadAll(resp.Body)
+
+	if err != nil {
+		return TdkResponse{}, err
+	}
+
+	var result map[string]interface{}
+	if err := json.Unmarshal(body, &result); err != nil {
+		return TdkResponse{}, err
+	}
+
+	_, isErrorOccurred := result["error"]
 
 	return TdkResponse{isExists: !isErrorOccurred}, nil
 }
