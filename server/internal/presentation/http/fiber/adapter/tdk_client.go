@@ -47,12 +47,18 @@ func (t TdkClient) Get(url string) (checker.TdkResponse, error) {
 		return TdkResponse{}, err
 	}
 
-	var result map[string]interface{}
+	var result interface{} // tdk's response is not consistent, so we use an empty interface. WTF bro
 	if err := json.Unmarshal(body, &result); err != nil {
-		return TdkResponse{}, err
+		return TdkResponse{}, TdkClientErr
 	}
 
-	_, isErrorOccurred := result["error"]
-
-	return TdkResponse{isExists: !isErrorOccurred}, nil
+	switch result.(type) {
+	case []interface{}: // if it's an array, we can assume that the word exists in tdk
+		return TdkResponse{isExists: true}, nil
+	case map[string]string: // if it's a map, we can assume that the word doesn't exist in tdk, due to tdk's response
+		_, isErrorOccurred := result.(map[string]string)["error"]
+		return TdkResponse{isExists: !isErrorOccurred}, nil
+	default:
+		return TdkResponse{isExists: false}, nil
+	}
 }
