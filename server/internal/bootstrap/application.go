@@ -3,8 +3,7 @@ package bootstrap
 import (
 	"context"
 	"fmt"
-	"log"
-	"strings"
+	"log/slog"
 
 	"github.com/grafana/pyroscope-go"
 	"github.com/h22k/wordle-turkish-overengineering/server/config"
@@ -16,6 +15,7 @@ import (
 	"github.com/h22k/wordle-turkish-overengineering/server/internal/presentation/http/echo/game"
 	"github.com/h22k/wordle-turkish-overengineering/server/internal/presentation/http/echo/middleware"
 	game2 "github.com/h22k/wordle-turkish-overengineering/server/internal/presentation/http/game"
+	"github.com/h22k/wordle-turkish-overengineering/server/internal/shared/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
@@ -23,6 +23,8 @@ import (
 )
 
 type Application struct {
+	Logger *slog.Logger
+
 	ctx        context.Context
 	echoApp    *echo.Echo
 	db         *pgxpool.Pool
@@ -33,6 +35,8 @@ type Application struct {
 }
 
 func InitApplication(ctx context.Context, cfg config.Config) *Application {
+	logger.InitLogger(cfg)
+
 	pgPoolConn := must(initPostgresqlPoolConn(ctx, cfg))
 	pgQuery := initPostgresQuery(pgPoolConn)
 	pgDb := newPostgresDb(pgQuery)
@@ -50,9 +54,8 @@ func InitApplication(ctx context.Context, cfg config.Config) *Application {
 		AllowCredentials: true,
 	}))
 
-	log.Printf("Allowing origins: %s", strings.Join(cfg.AllowOrigins, ", "))
-
 	return &Application{
+		Logger:     slog.Default(),
 		appService: as,
 		cfg:        cfg,
 		echoApp:    e,
