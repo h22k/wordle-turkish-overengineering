@@ -32,26 +32,18 @@ func NewWordGuess(word, guess Word) WordGuess {
 	runeWord := []rune(word.String())
 
 	runeIndex := 0
-
 	for _, char := range guess {
-		if runeWord[runeIndex] == char {
+		switch true {
+		case runeWord[runeIndex] == char:
 			letters[runeIndex] = NewLetter(char, Correct)
+			break
+		case letterMap[char] > 0:
+			letters[runeIndex] = NewLetter(char, Present)
 			letterMap[char]--
+			break
+		default:
+			letters[runeIndex] = NewLetter(char, Absent)
 		}
-		runeIndex++
-	}
-
-	runeIndex = 0 // reset index for the second check
-
-	for _, char := range guess {
-		status := Absent
-
-		if letterMap[char] > 0 {
-			status = Present
-			letterMap[char]--
-		}
-
-		letters[runeIndex] = NewLetter(char, status)
 		runeIndex++
 	}
 
