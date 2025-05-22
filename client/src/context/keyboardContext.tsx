@@ -130,7 +130,10 @@ export const KeyboardProvider: React.FC<React.PropsWithChildren<object>> = ({ ch
 
     try {
       const res = await axiosClient.post('/game/guess', {
-        guess: currentWord?.map((l) => l.char).join(''),
+        guess: currentWord
+          ?.map((l) => l.char)
+          .join('')
+          .toLocaleLowerCase('tr'),
       })
 
       const updated = [...letters]
