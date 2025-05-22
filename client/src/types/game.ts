@@ -14,13 +14,16 @@ export interface KeyboardContextType {
   letters: LetterProps[][]
   handleChange: (value: string) => void
   currentRow: number
-  moveToNextRow: () => void
   activeBoxIndex: number
   setActiveBoxIndex: (index: number) => void
   shakeRowIndex: number | null
   triggerShake: (row: number) => void
   getFirstEmptyBoxIndex: (row: number) => number
   submittedRow: number | null
+  maxAttempts: number
+  wordLength: number
+  loading: boolean
+  alphabet: Record<string, LetterStatus>
 }
 
 export interface LetterRowProps {
