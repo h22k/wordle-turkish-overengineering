@@ -124,6 +124,7 @@ export const KeyboardProvider: React.FC<React.PropsWithChildren<object>> = ({ ch
 
     if (filledLetters.length !== wordLength) {
       triggerShake(currentRow)
+      notify('Kelime sayısı yetersiz.')
       return
     }
 
