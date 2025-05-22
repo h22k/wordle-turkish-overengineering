@@ -11,18 +11,19 @@ export const getUpdatedAlphabet = (
   prevAlphabet: Record<string, LetterStatus>,
   newLetters: LetterProps[][]
 ): Record<string, LetterStatus> => {
-  const updated = { ...prevAlphabet }
+  return newLetters.flat().reduce(
+    (acc, { char, status }) => {
+      if (!char) return acc
 
-  for (const row of newLetters) {
-    for (const { char, status } of row) {
-      if (!char) continue
       const upperChar = char.toLocaleUpperCase('tr')
+      const prevStatus = acc[upperChar] ?? 'empty'
 
-      if (!(upperChar in updated) || priority[status] > priority[updated[upperChar]]) {
-        updated[upperChar] = status
+      if (priority[status] > priority[prevStatus]) {
+        acc[upperChar] = status
       }
-    }
-  }
 
-  return updated
+      return acc
+    },
+    { ...prevAlphabet }
+  )
 }
