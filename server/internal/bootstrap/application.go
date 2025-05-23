@@ -20,6 +20,7 @@ import (
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"golang.org/x/time/rate"
 )
 
 type Application struct {
@@ -111,13 +112,15 @@ func (a *Application) setMiddlewares() {
 	a.echoApp.Use(middleware.ServerTimingMiddleware())
 	a.echoApp.Use(middleware.IdentifierCookieMiddleware(a.cfg.CookieDomain, a.cfg.IsProd()))
 	a.echoApp.Use(echoMiddleware.RequestID())
-	a.echoApp.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			c.Response().Header().Set(echo.HeaderAccessControlAllowCredentials, "true")
-			c.Response().Header().Set(echo.HeaderAccessControlAllowMethods, "GET, POST, PUT, DELETE, OPTIONS")
-			return next(c)
-		}
-	})
+
+	a.echoApp.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
+		AllowOrigins:     a.cfg.AllowOrigins,
+		AllowMethods:     []string{echo.GET, echo.POST, echo.OPTIONS, echo.PUT, echo.DELETE},
+		AllowCredentials: true,
+	}))
+
+	a.echoApp.Use(echoMiddleware.Recover())
+	a.echoApp.Use(echoMiddleware.RateLimiter(echoMiddleware.NewRateLimiterMemoryStore(rate.Limit(2))))
 }
 
 func (a *Application) setGameRoutes(gameRoute *echo.Group, v validator3.InputValidator) {
