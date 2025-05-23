@@ -25,31 +25,25 @@ func NewLetter(char rune, status LetterStatus) Letter {
 	}
 }
 
-// NewWordGuess TODO: refactor this function to make it more readable
 func NewWordGuess(word, guess Word) WordGuess {
-	letters := make([]Letter, guess.Len())
+	guessRunes := []rune(guess.String())
+	wordRunes := []rune(word.String())
+
+	letters := make([]Letter, len(guessRunes))
 	letterMap := letterFrequencies(word)
-	runeWord := []rune(word.String())
-	correctLetterIndices := make(map[int]struct{})
 
-	runeIndex := 0
-
-	for _, char := range guess {
-		if runeWord[runeIndex] == char {
-			letters[runeIndex] = NewLetter(char, Correct)
-			correctLetterIndices[runeIndex] = struct{}{}
+	for i, char := range guessRunes {
+		if i < len(wordRunes) && wordRunes[i] == char {
+			letters[i] = NewLetter(char, Correct)
 			letterMap[char]--
 		}
-		runeIndex++
 	}
 
-	runeIndex = 0 // reset index for the second check
-
-	for _, char := range guess {
-		if _, ok := correctLetterIndices[runeIndex]; ok {
-			runeIndex++
+	for i, char := range guessRunes {
+		if letters[i].Status != "" {
 			continue
 		}
+
 		status := Absent
 
 		if letterMap[char] > 0 {
@@ -57,8 +51,7 @@ func NewWordGuess(word, guess Word) WordGuess {
 			letterMap[char]--
 		}
 
-		letters[runeIndex] = NewLetter(char, status)
-		runeIndex++
+		letters[i] = NewLetter(char, status)
 	}
 
 	return WordGuess{
@@ -78,12 +71,10 @@ func (g *WordGuess) IsCorrect() bool {
 
 func letterFrequencies(word Word) map[rune]int {
 	letterMap := make(map[rune]int)
-	for _, letter := range word.String() {
-		if _, ok := letterMap[letter]; ok {
-			letterMap[letter]++
-		} else {
-			letterMap[letter] = 1
-		}
+
+	for _, letter := range word {
+		letterMap[letter]++
 	}
+
 	return letterMap
 }
