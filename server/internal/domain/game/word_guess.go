@@ -30,20 +30,34 @@ func NewWordGuess(word, guess Word) WordGuess {
 	letters := make([]Letter, guess.Len())
 	letterMap := letterFrequencies(word)
 	runeWord := []rune(word.String())
+	correctLetterIndices := make(map[int]struct{})
 
 	runeIndex := 0
+
 	for _, char := range guess {
-		switch true {
-		case runeWord[runeIndex] == char:
+		if runeWord[runeIndex] == char {
 			letters[runeIndex] = NewLetter(char, Correct)
-			break
-		case letterMap[char] > 0:
-			letters[runeIndex] = NewLetter(char, Present)
+			correctLetterIndices[runeIndex] = struct{}{}
 			letterMap[char]--
-			break
-		default:
-			letters[runeIndex] = NewLetter(char, Absent)
 		}
+		runeIndex++
+	}
+
+	runeIndex = 0 // reset index for the second check
+
+	for _, char := range guess {
+		if _, ok := correctLetterIndices[runeIndex]; ok {
+			runeIndex++
+			continue
+		}
+		status := Absent
+
+		if letterMap[char] > 0 {
+			status = Present
+			letterMap[char]--
+		}
+
+		letters[runeIndex] = NewLetter(char, status)
 		runeIndex++
 	}
 
