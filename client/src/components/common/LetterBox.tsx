@@ -61,6 +61,7 @@ function LetterBox({ letter, status, isFirstBox, index, rowIndex }: LetterBoxPro
 
   return (
     <input
+      inputMode="none"
       autoFocus={isFirstBox}
       ref={inputRef}
       type="text"
